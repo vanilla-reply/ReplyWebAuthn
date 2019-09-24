@@ -1,0 +1,8 @@
+image: php:7.2
+
+before_script:
+- wget https://squizlabs.github.io/PHP_CodeSniffer/phpcs.phar
+
+check:psr2:
+  script:
+  - php phpcs.phar --standard=PSR2 --extensions=php .
