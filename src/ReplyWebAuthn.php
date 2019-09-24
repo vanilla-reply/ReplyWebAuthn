@@ -12,7 +12,7 @@ use Shopware\Core\System\SystemConfig\SystemConfigService;
 
 class ReplyWebAuthn extends Plugin
 {
-    public const CONFIG_PREFIX = 'ReplyWebAuthn.config.';
+    public const CONFIG_PREFIX = 'ReplyWebAuthn.config';
 
     public function install(InstallContext $installContext): void
     {
@@ -47,7 +47,7 @@ class ReplyWebAuthn extends Plugin
         $systemConfigService = $this->getSystemConfigService();
 
         foreach ($config->getIterator() as $key => $value) {
-            $prefixedKey = self::CONFIG_PREFIX . $key;
+            $prefixedKey = self::CONFIG_PREFIX . '.' .  $key;
             if ($systemConfigService->get($prefixedKey) === null) {
                 $systemConfigService->set($prefixedKey, $value);
             }
@@ -60,7 +60,7 @@ class ReplyWebAuthn extends Plugin
         $query
             ->delete('system_config')
             ->where('configuration_key LIKE :key')
-            ->setParameter(':key', self::CONFIG_PREFIX . '%');
+            ->setParameter(':key', self::CONFIG_PREFIX . '.%');
 
         $query->execute();
     }

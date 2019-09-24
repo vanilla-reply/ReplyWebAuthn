@@ -47,7 +47,6 @@
         <!-- Configuration services -->
         <service id="Reply\WebAuthn\Configuration\ConfigurationService" public="true">
             <argument id="Shopware\Core\System\SystemConfig\SystemConfigService" type="service"/>
-            <argument type="string">ReplyWebAuthn.config</argument>
         </service>
 
         <!-- Bridge services -->

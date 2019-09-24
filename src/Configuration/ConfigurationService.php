@@ -2,6 +2,7 @@
 
 namespace Reply\WebAuthn\Configuration;
 
+use Reply\WebAuthn\ReplyWebAuthn;
 use Shopware\Core\System\SystemConfig\SystemConfigService;
 
 class ConfigurationService
@@ -11,19 +12,13 @@ class ConfigurationService
      */
     private $systemConfigService;
 
-    /**
-     * @var string
-     */
-    private $keyPrefix;
-
-    public function __construct(SystemConfigService $systemConfigService, string $keyPrefix)
+    public function __construct(SystemConfigService $systemConfigService)
     {
         $this->systemConfigService = $systemConfigService;
-        $this->keyPrefix = $keyPrefix;
     }
 
     public function get(): Configuration
     {
-        return new Configuration($this->systemConfigService->get($this->keyPrefix) ?? []);
+        return new Configuration($this->systemConfigService->get(ReplyWebAuthn::CONFIG_PREFIX) ?? []);
     }
 }
