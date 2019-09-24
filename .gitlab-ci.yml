@@ -1,7 +1,7 @@
 image: php:7.2
 
 before_script:
-- wget https://squizlabs.github.io/PHP_CodeSniffer/phpcs.phar
+- curl https://squizlabs.github.io/PHP_CodeSniffer/phpcs.phar --output phpcs.phar
 
 check:psr2:
   script:
