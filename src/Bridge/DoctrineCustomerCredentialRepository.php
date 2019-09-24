@@ -78,7 +78,7 @@ class DoctrineCustomerCredentialRepository implements PublicKeyCredentialSourceR
         $result = $query->execute();
         $values = $result->fetchAll(FetchMode::ASSOCIATIVE);
 
-        return array_map(function(array $row) {
+        return array_map(function (array $row) {
             return $this->hydrate($row);
         }, $values);
     }

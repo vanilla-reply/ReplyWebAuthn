@@ -4,7 +4,7 @@ namespace Reply\WebAuthn\Resources\snippet\de_DE;
 
 use Shopware\Core\Framework\Snippet\Files\SnippetFileInterface;
 
-class SnippetFile_de_DE implements SnippetFileInterface
+class SnippetFile_de_DE implements SnippetFileInterface // @codingStandardsIgnoreLine
 {
     /**
      * Returns the displayed name.

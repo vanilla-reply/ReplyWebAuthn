@@ -57,8 +57,14 @@ class LoginController extends AbstractController
      */
     private $authenticatorAssertionResponseValidator;
 
-    public function __construct(AccountService $accountService, CustomerCredentialRepository $credentialRepository, PublicKeyCredentialDescriptorFakeFactory $fakeFactory, PublicKeyCredentialRequestOptionsFactory $requestOptionsFactory, PublicKeyCredentialLoader $credentialLoader, AuthenticatorAssertionResponseValidator $authenticatorAssertionResponseValidator)
-    {
+    public function __construct(
+        AccountService $accountService,
+        CustomerCredentialRepository $credentialRepository,
+        PublicKeyCredentialDescriptorFakeFactory $fakeFactory,
+        PublicKeyCredentialRequestOptionsFactory $requestOptionsFactory,
+        PublicKeyCredentialLoader $credentialLoader,
+        AuthenticatorAssertionResponseValidator $authenticatorAssertionResponseValidator
+    ) {
         $this->accountService = $accountService;
         $this->credentialRepository = $credentialRepository;
         $this->fakeFactory = $fakeFactory;
@@ -76,12 +82,10 @@ class LoginController extends AbstractController
 
         try {
             $customer = $this->accountService->getCustomerByEmail($username, $context);
-
             $descriptors = [];
             foreach ($this->credentialRepository->findAllByCustomerId($customer->getId()) as $credentialSource) {
                 $descriptors[] = $credentialSource->getPublicKeyCredentialDescriptor();
             }
-
         } catch (CustomerNotFoundException $e) {
             // Proceed with fake data to prevent user discovery by requesting this endpoint with random usernames
             $descriptors = [$this->fakeFactory->create($username)];

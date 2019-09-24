@@ -29,8 +29,11 @@ class AccountCredentialPageLoader
      */
     private $eventDispatcher;
 
-    public function __construct(CustomerCredentialRepository $credentialRepository, GenericPageLoader $genericLoader, EventDispatcherInterface $eventDispatcher)
-    {
+    public function __construct(
+        CustomerCredentialRepository $credentialRepository,
+        GenericPageLoader $genericLoader,
+        EventDispatcherInterface $eventDispatcher
+    ) {
         $this->credentialRepository = $credentialRepository;
         $this->genericLoader = $genericLoader;
         $this->eventDispatcher = $eventDispatcher;

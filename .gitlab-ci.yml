@@ -5,4 +5,4 @@ before_script:
 
 check:psr2:
   script:
-  - php phpcs.phar --standard=PSR2 --extensions=php .
+  - php phpcs.phar --standard=PSR2 --extensions=php --warning-severity=0 .
