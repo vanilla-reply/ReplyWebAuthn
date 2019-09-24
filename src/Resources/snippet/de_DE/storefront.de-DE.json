@@ -1,0 +1,16 @@
+{
+    "reply-web-authn": {
+        "account": {
+            "credentialLink": "Zugangsschlüssel",
+            "credentialTitle": "Zugangsschlüssel",
+            "credentialText": "Verwalten Sie hier ihre Zugangsschlüssel zum Anmelden ohne Passwort",
+            "credentialCreate": "Hinzufügen",
+            "credentialDelete": "Löschen",
+            "credentialDeleteAll": "Alle löschen",
+            "credentialEmpty": "Keine Zugangsschlüssel registriert"
+        },
+        "login": {
+            "useWebAuthn": "Sicherheitsschlüssel verwenden"
+        }
+    }
+}

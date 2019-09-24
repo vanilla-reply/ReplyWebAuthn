@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/platform/master/src/Core/System/SystemConfig/Schema/config.xsd">
+    <card>
+        <title>WebAuthn</title>
+        <title lang="de-DE">WebAuthn</title>
+
+        <input-field type="single-select">
+            <name>attestation</name>
+            <label>Attestation</label>
+            <label lang="de-DE">Attestation</label>
+            <options>
+                <option>
+                    <id>none</id>
+                    <name>None</name>
+                    <name lang="de-DE">Keine</name>
+                </option>
+                <option>
+                    <id>indirect</id>
+                    <name>Indirect</name>
+                    <name lang="de-DE">Indirekt</name>
+                </option>
+                <option>
+                    <id>direct</id>
+                    <name>Direct</name>
+                    <name lang="de-DE">Direkt</name>
+                </option>
+            </options>
+        </input-field>
+
+        <input-field type="single-select">
+            <name>userVerification</name>
+            <label>User Verification</label>
+            <label lang="de-DE">Benutzer Verifikation</label>
+            <options>
+                <option>
+                    <id>required</id>
+                    <name>required</name>
+                    <name lang="de-DE">Erforderlich</name>
+                </option>
+                <option>
+                    <id>preferred</id>
+                    <name>preferred</name>
+                    <name lang="de-DE">Empfohlen</name>
+                </option>
+                <option>
+                    <id>discouraged</id>
+                    <name>discouraged</name>
+                    <name lang="de-DE">Nicht erforderlich</name>
+                </option>
+            </options>
+        </input-field>
+
+        <input-field type="multi-select">
+            <name>attestationStatementFormats</name>
+            <label>Attestation statement formats</label>
+            <options>
+                <option>
+                    <id>android-key</id>
+                    <name>Android Key</name>
+                </option>
+                <option>
+                    <id>fido-u2f</id>
+                    <name>FIDO U2F</name>
+                </option>
+                <option>
+                    <id>none</id>
+                    <name>None</name>
+                </option>
+                <option>
+                    <id>tpm</id>
+                    <name>Trusted Platform Module</name>
+                </option>
+            </options>
+        </input-field>
+
+        <input-field type="int">
+            <name>timeout</name>
+            <label>Timeout</label>
+            <label lang="de-DE">Timeout</label>
+        </input-field>
+
+        <input-field type="bool">
+            <name>requireResidentKey</name>
+            <label>Require Resident Keys</label>
+            <label lang="de-DE">Resident Keys erforderlich</label>
+        </input-field>
+    </card>
+
+</config>

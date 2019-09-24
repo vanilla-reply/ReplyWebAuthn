@@ -1,0 +1,13 @@
+{% sw_extends 'base.html.twig' %}
+
+{% block base_script_router %}
+    {{ parent() }}
+
+    {# Register all routes that will be needed in JavaScript to the window.router object #}
+    <script>
+        window.router['frontend.account.webauthn.login.init'] = '{{ path('frontend.account.webauthn.login.init') }}';
+        window.router['frontend.account.webauthn.login.finalize'] = '{{ path('frontend.account.webauthn.login.finalize') }}';
+        window.router['frontend.account.webauthn.credential.creation-options'] = '{{ path('frontend.account.webauthn.credential.creation-options') }}';
+        window.router['frontend.account.webauthn.credential.save'] = '{{ path('frontend.account.webauthn.credential.save') }}';
+    </script>
+{% endblock %}

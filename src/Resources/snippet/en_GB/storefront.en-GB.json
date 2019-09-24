@@ -1,0 +1,16 @@
+{
+    "reply-web-authn": {
+        "account": {
+            "credentialLink": "Access keys",
+            "credentialTitle": "Access keys",
+            "credentialText": "Manage your access keys for login without password",
+            "credentialCreate": "Add",
+            "credentialDeleteAll": "Delete all",
+            "credentialDelete": "Delete",
+            "credentialEmpty": "No access keys registered"
+        },
+        "login": {
+            "useWebAuthn": "Use security key"
+        }
+    }
+}

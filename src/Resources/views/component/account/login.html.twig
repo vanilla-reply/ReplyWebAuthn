@@ -1,0 +1,50 @@
+{% sw_extends 'component/account/login.html.twig' %}
+
+{% block component_account_login_form_password %}
+    <div class="form-group col-md-6 js-form-field-toggle-login-password">
+        {% block component_account_login_form_password_label %}
+            <label class="form-label"
+                   for="loginPassword">
+                {{ "account.loginPasswordLabel"|trans }}
+            </label>
+        {% endblock %}
+        {% block component_account_login_form_password_input %}
+            <input type="password"
+                   class="form-control{% if loginError %} is-invalid{% endif %}"
+                   id="loginPassword"
+                   placeholder="{{ "account.loginPasswordPlaceholder"|trans }}"
+                   name="password"
+                   required="required">
+        {% endblock %}
+    </div>
+{% endblock %}
+
+{% block component_account_login_form_fields %}
+    {{ parent() }}
+    <style>
+        .login-use-webauthn {
+            margin-bottom: 1rem;
+        }
+    </style>
+    <div class="custom-control custom-checkbox login-use-webauthn">
+        <input type="checkbox"
+               class="custom-control-input js-use-webauthn"
+               name="useWebAuthn"
+               id="useWebAuthn"
+               data-form-field-toggle="true"
+               data-form-field-toggle-target=".js-form-field-toggle-login-password"
+               data-form-field-toggle-value="false"
+        />
+        <label class="custom-control-label no-validation" for="useWebAuthn">
+            {{ 'reply-web-authn.login.useWebAuthn'|trans }}
+        </label>
+    </div>
+{% endblock %}
+
+{% block component_account_login_form_redirect %}
+    {{ parent() }}
+
+    <input type="hidden"
+           name="redirectPath"
+           value="{{ path(redirectTo) }}">
+{% endblock %}

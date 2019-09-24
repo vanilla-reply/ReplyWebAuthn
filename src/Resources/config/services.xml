@@ -1,0 +1,105 @@
+<?xml version="1.0" ?>
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+    <services>
+        <!-- Pages -->
+        <service id="Reply\WebAuthn\Page\Account\Credential\AccountCredentialPageLoader">
+            <argument id="Reply\WebAuthn\Bridge\DoctrineCustomerCredentialRepository" type="service"/>
+            <argument id="Shopware\Storefront\Page\GenericPageLoader" type="service"/>
+            <argument id="event_dispatcher" type="service"/>
+        </service>
+
+        <!-- Snippets -->
+        <service id="Reply\WebAuthn\Resources\snippet\en_GB\SnippetFile_en_GB">
+            <tag name="shopware.snippet.file" priority="100"/>
+        </service>
+        <service id="Reply\WebAuthn\Resources\snippet\de_DE\SnippetFile_de_DE">
+            <tag name="shopware.snippet.file" priority="100"/>
+        </service>
+
+        <!-- Controller -->
+        <service id="Reply\WebAuthn\Controller\AccountCredentialController" public="true">
+            <argument id="Reply\WebAuthn\Page\Account\Credential\AccountCredentialPageLoader" type="service"/>
+            <argument id="Reply\WebAuthn\Bridge\PublicKeyCredentialCreationOptionsFactory" type="service"/>
+            <argument id="Reply\WebAuthn\Bridge\DoctrineCustomerCredentialRepository" type="service"/>
+            <argument id="Webauthn\PublicKeyCredentialLoader" type="service"/>
+            <argument id="Webauthn\AuthenticatorAttestationResponseValidator" type="service"/>
+            <call method="setContainer">
+                <argument id="service_container" type="service"/>
+            </call>
+        </service>
+
+        <service id="Reply\WebAuthn\Controller\LoginController" public="true">
+            <argument id="Shopware\Core\Checkout\Customer\SalesChannel\AccountService" type="service"/>
+            <argument id="Reply\WebAuthn\Bridge\DoctrineCustomerCredentialRepository" type="service"/>
+            <argument id="Reply\WebAuthn\Bridge\PublicKeyCredentialDescriptorFakeFactory" type="service"/>
+            <argument id="Reply\WebAuthn\Bridge\PublicKeyCredentialRequestOptionsFactory" type="service"/>
+            <argument id="Webauthn\PublicKeyCredentialLoader" type="service"/>
+            <argument id="Webauthn\AuthenticatorAssertionResponseValidator" type="service"/>
+            <call method="setContainer">
+                <argument id="service_container" type="service"/>
+            </call>
+        </service>
+
+        <!-- Configuration services -->
+        <service id="Reply\WebAuthn\Configuration\ConfigurationService" public="true">
+            <argument id="Shopware\Core\System\SystemConfig\SystemConfigService" type="service"/>
+            <argument type="string">ReplyWebAuthn.config</argument>
+        </service>
+
+        <!-- Bridge services -->
+        <service id="Reply\WebAuthn\Bridge\PublicKeyCredentialDescriptorFakeFactory"/>
+
+        <service id="Reply\WebAuthn\Bridge\AttestationStatementSupportManagerConfigurator">
+            <argument id="Reply\WebAuthn\Configuration\ConfigurationService" type="service"/>
+        </service>
+        <service id="Webauthn\AttestationStatement\AttestationStatementSupportManager">
+            <configurator service="Reply\WebAuthn\Bridge\AttestationStatementSupportManagerConfigurator"/>
+        </service>
+
+        <service id="Webauthn\AttestationStatement\AttestationObjectLoader">
+            <argument id="Webauthn\AttestationStatement\AttestationStatementSupportManager" type="service"/>
+        </service>
+
+        <service id="Webauthn\PublicKeyCredentialLoader">
+            <argument id="Webauthn\AttestationStatement\AttestationObjectLoader" type="service"/>
+        </service>
+
+        <service id="Reply\WebAuthn\Bridge\DoctrineCustomerCredentialRepository">
+            <argument id="Doctrine\DBAL\Connection" type="service"/>
+        </service>
+
+        <service id="Webauthn\TokenBinding\TokenBindingNotSupportedHandler"/>
+        <service id="Webauthn\AuthenticationExtensions\ExtensionOutputCheckerHandler"/>
+
+        <service id="Reply\WebAuthn\Bridge\CoseAlgorithmManagerConfigurator"/>
+        <service id="Cose\Algorithm\Manager">
+            <configurator service="Reply\WebAuthn\Bridge\CoseAlgorithmManagerConfigurator"/>
+        </service>
+
+        <service id="Reply\WebAuthn\Bridge\PublicKeyCredentialCreationOptionsFactory">
+            <argument id="Cose\Algorithm\Manager" type="service"/>
+            <argument id="Reply\WebAuthn\Configuration\ConfigurationService" type="service"/>
+        </service>
+
+        <service id="Reply\WebAuthn\Bridge\PublicKeyCredentialRequestOptionsFactory">
+            <argument id="Reply\WebAuthn\Configuration\ConfigurationService" type="service"/>
+        </service>
+
+        <service id="Webauthn\AuthenticatorAttestationResponseValidator">
+            <argument id="Webauthn\AttestationStatement\AttestationStatementSupportManager" type="service"/>
+            <argument id="Reply\WebAuthn\Bridge\DoctrineCustomerCredentialRepository" type="service"/>
+            <argument id="Webauthn\TokenBinding\TokenBindingNotSupportedHandler" type="service"/>
+            <argument id="Webauthn\AuthenticationExtensions\ExtensionOutputCheckerHandler" type="service"/>
+        </service>
+
+        <service id="Webauthn\AuthenticatorAssertionResponseValidator">
+            <argument id="Reply\WebAuthn\Bridge\DoctrineCustomerCredentialRepository" type="service"/>
+            <argument id="foo-bar" type="service" on-invalid="null"/>
+            <argument id="Webauthn\TokenBinding\TokenBindingNotSupportedHandler" type="service"/>
+            <argument id="Webauthn\AuthenticationExtensions\ExtensionOutputCheckerHandler" type="service"/>
+            <argument id="Cose\Algorithm\Manager" type="service"/>
+        </service>
+    </services>
+</container>

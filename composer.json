@@ -1,0 +1,27 @@
+{
+  "name": "reply/web-authn",
+  "description": "Shopware 6 Plugin for WebAuthn",
+  "version": "v1.0.0",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Portaltech Reply GmbH"
+    }
+  ],
+  "type": "shopware-platform-plugin",
+  "autoload": {
+    "psr-4": {
+      "Reply\\WebAuthn\\": "src/"
+    }
+  },
+  "require": {
+    "web-auth/webauthn-lib": "^2.0.3"
+  },
+  "extra": {
+    "shopware-plugin-class": "Reply\\WebAuthn\\ReplyWebAuthn",
+    "label": {
+      "de-DE": "WebAuthn Authentifizierung",
+      "en-GB": "WebAuthn authentification"
+    }
+  }
+}
