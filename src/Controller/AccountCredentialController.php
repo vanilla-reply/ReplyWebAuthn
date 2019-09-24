@@ -3,7 +3,6 @@
 namespace Reply\WebAuthn\Controller;
 
 use Base64Url\Base64Url;
-use GuzzleHttp\Psr7\ServerRequest;
 use Reply\WebAuthn\Bridge\CustomerCredentialRepository;
 use Reply\WebAuthn\Bridge\NamedCredential;
 use Reply\WebAuthn\Bridge\PublicKeyCredentialCreationOptionsFactory;
@@ -11,6 +10,7 @@ use Reply\WebAuthn\Page\Account\Credential\AccountCredentialPageLoader;
 use Shopware\Core\Checkout\Cart\Exception\CustomerNotLoggedInException;
 use Shopware\Core\Framework\Routing\Annotation\RouteScope;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
+use Symfony\Bridge\PsrHttpMessage\HttpMessageFactoryInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -53,18 +53,25 @@ class AccountCredentialController extends AbstractController
      */
     private $authenticatorAttestationResponseValidator;
 
+    /**
+     * @var HttpMessageFactoryInterface
+     */
+    private $httpMessageFactory;
+
     public function __construct(
         AccountCredentialPageLoader $pageLoader,
         PublicKeyCredentialCreationOptionsFactory $creationOptionsFactory,
         CustomerCredentialRepository $credentialRepository,
         PublicKeyCredentialLoader $credentialLoader,
-        AuthenticatorAttestationResponseValidator $authenticatorAttestationResponseValidator
+        AuthenticatorAttestationResponseValidator $authenticatorAttestationResponseValidator,
+        HttpMessageFactoryInterface $httpMessageFactory
     ) {
         $this->pageLoader = $pageLoader;
         $this->creationOptionsFactory = $creationOptionsFactory;
         $this->credentialRepository = $credentialRepository;
         $this->credentialLoader = $credentialLoader;
         $this->authenticatorAttestationResponseValidator = $authenticatorAttestationResponseValidator;
+        $this->httpMessageFactory = $httpMessageFactory;
     }
 
     /**
@@ -114,7 +121,6 @@ class AccountCredentialController extends AbstractController
             return $this->denyAccess('Not an authenticator attestation response');
         }
 
-        $psrRequest = ServerRequest::fromGlobals();
         $creationOptionsJson = $this->getSession()->get(self::CREATION_OPTIONS_SESSION_KEY);
         if (!is_string($creationOptionsJson)) {
             return $this->denyAccess('Cannot find valid credential creation options');
@@ -122,6 +128,7 @@ class AccountCredentialController extends AbstractController
 
         /** @var PublicKeyCredentialCreationOptions $creationOptions */
         $creationOptions = PublicKeyCredentialCreationOptions::createFromString($creationOptionsJson);
+        $psrRequest = $this->httpMessageFactory->createRequest($request);
         $this->authenticatorAttestationResponseValidator->check($response, $creationOptions, $psrRequest);
 
         $credentialSource = PublicKeyCredentialSource::createFromPublicKeyCredential(

@@ -2,7 +2,6 @@
 
 namespace Reply\WebAuthn\Controller;
 
-use GuzzleHttp\Psr7\ServerRequest;
 use Reply\WebAuthn\Bridge\CustomerCredentialRepository;
 use Reply\WebAuthn\Bridge\PublicKeyCredentialDescriptorFakeFactory;
 use Reply\WebAuthn\Bridge\PublicKeyCredentialRequestOptionsFactory;
@@ -10,6 +9,7 @@ use Shopware\Core\Checkout\Customer\Exception\CustomerNotFoundException;
 use Shopware\Core\Checkout\Customer\SalesChannel\AccountService;
 use Shopware\Core\Framework\Routing\Annotation\RouteScope;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
+use Symfony\Bridge\PsrHttpMessage\HttpMessageFactoryInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -57,13 +57,19 @@ class LoginController extends AbstractController
      */
     private $authenticatorAssertionResponseValidator;
 
+    /**
+     * @var HttpMessageFactoryInterface
+     */
+    private $httpMessageFactory;
+
     public function __construct(
         AccountService $accountService,
         CustomerCredentialRepository $credentialRepository,
         PublicKeyCredentialDescriptorFakeFactory $fakeFactory,
         PublicKeyCredentialRequestOptionsFactory $requestOptionsFactory,
         PublicKeyCredentialLoader $credentialLoader,
-        AuthenticatorAssertionResponseValidator $authenticatorAssertionResponseValidator
+        AuthenticatorAssertionResponseValidator $authenticatorAssertionResponseValidator,
+        HttpMessageFactoryInterface $httpMessageFactory
     ) {
         $this->accountService = $accountService;
         $this->credentialRepository = $credentialRepository;
@@ -71,6 +77,7 @@ class LoginController extends AbstractController
         $this->requestOptionsFactory = $requestOptionsFactory;
         $this->credentialLoader = $credentialLoader;
         $this->authenticatorAssertionResponseValidator = $authenticatorAssertionResponseValidator;
+        $this->httpMessageFactory = $httpMessageFactory;
     }
 
     /**
@@ -121,7 +128,7 @@ class LoginController extends AbstractController
 
         /** @var PublicKeyCredentialRequestOptions $requestOptions */
         $requestOptions = PublicKeyCredentialRequestOptions::createFromString($requestOptionsJson);
-        $psrRequest = ServerRequest::fromGlobals();
+        $psrRequest = $this->httpMessageFactory->createRequest($request);
 
         $this->authenticatorAssertionResponseValidator->check(
             $credential->getRawId(),
