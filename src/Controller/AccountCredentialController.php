@@ -19,7 +19,6 @@ use Webauthn\AuthenticatorAttestationResponse;
 use Webauthn\AuthenticatorAttestationResponseValidator;
 use Webauthn\PublicKeyCredentialCreationOptions;
 use Webauthn\PublicKeyCredentialLoader;
-use Webauthn\PublicKeyCredentialSource;
 
 /**
  * @RouteScope(scopes={"storefront"})
@@ -129,17 +128,9 @@ class AccountCredentialController extends AbstractController
         /** @var PublicKeyCredentialCreationOptions $creationOptions */
         $creationOptions = PublicKeyCredentialCreationOptions::createFromString($creationOptionsJson);
         $psrRequest = $this->httpMessageFactory->createRequest($request);
-        $this->authenticatorAttestationResponseValidator->check($response, $creationOptions, $psrRequest);
-
-        $credentialSource = PublicKeyCredentialSource::createFromPublicKeyCredential(
-            $credential,
-            $creationOptions->getUser()->getId()
-        );
-
+        $credentialSource = $this->authenticatorAttestationResponseValidator->check($response, $creationOptions, $psrRequest);
         $namedCredential = new NamedCredential($credentialSource, $requestParams['name']);
-
         $this->credentialRepository->saveCredentialSource($namedCredential);
-
         $this->getSession()->remove(self::CREATION_OPTIONS_SESSION_KEY);
 
         return new JsonResponse();

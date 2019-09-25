@@ -3,12 +3,9 @@
 namespace Reply\WebAuthn\Bridge;
 
 use Reply\WebAuthn\Configuration\ConfigurationService;
-use Webauthn\AttestationStatement\AndroidKeyAttestationStatementSupport;
+use Reply\WebAuthn\Exception\UnsupportedAttestationStatementTypeException;
 use Webauthn\AttestationStatement\AttestationStatementSupport;
 use Webauthn\AttestationStatement\AttestationStatementSupportManager;
-use Webauthn\AttestationStatement\FidoU2FAttestationStatementSupport;
-use Webauthn\AttestationStatement\NoneAttestationStatementSupport;
-use Webauthn\AttestationStatement\TPMAttestationStatementSupport;
 
 class AttestationStatementSupportManagerConfigurator
 {
@@ -17,32 +14,37 @@ class AttestationStatementSupportManagerConfigurator
      */
     private $configService;
 
-    public function __construct(ConfigurationService $configService)
+    /**
+     * @var AttestationStatementSupport[]|array
+     */
+    private $supportedTypes;
+
+    /**
+     * @param ConfigurationService $configService
+     * @param AttestationStatementSupport[] $supportedTypes
+     */
+    public function __construct(ConfigurationService $configService, iterable $supportedTypes)
     {
         $this->configService = $configService;
-    }
-
-    public function __invoke(AttestationStatementSupportManager $manager)
-    {
-        $config = $this->configService->get();
-
-        foreach ($this->getSupportedFormats() as $supportedFormat) {
-            if (in_array($supportedFormat->name(), $config->getAttestationStatementFormats())) {
-                $manager->add($supportedFormat);
-            }
+        $this->supportedTypes = [];
+        foreach ($supportedTypes as $supportedType) {
+            $this->supportedTypes[$supportedType->name()] = $supportedType;
         }
     }
 
-    /**
-     * @return AttestationStatementSupport[]
-     */
-    private function getSupportedFormats(): array
+    public function __invoke(AttestationStatementSupportManager $manager): void
     {
-        return [
-            new FidoU2FAttestationStatementSupport(),
-            new NoneAttestationStatementSupport(),
-            new AndroidKeyAttestationStatementSupport(),
-            new TPMAttestationStatementSupport()
-        ];
+        $config = $this->configService->get();
+        foreach ($config->getAttestationStatementFormats() as $formatName) {
+            $manager->add($this->getTypeByName($formatName));
+        }
+    }
+
+    private function getTypeByName(string $name): AttestationStatementSupport
+    {
+        if (!isset($this->supportedTypes[$name])) {
+            throw new UnsupportedAttestationStatementTypeException($name);
+        }
+        return $this->supportedTypes[$name];
     }
 }

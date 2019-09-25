@@ -54,6 +54,7 @@
 
         <service id="Reply\WebAuthn\Bridge\AttestationStatementSupportManagerConfigurator">
             <argument id="Reply\WebAuthn\Configuration\ConfigurationService" type="service"/>
+            <argument type="tagged" tag="reply.webauthn.supported_attestation_statement"/>
         </service>
         <service id="Webauthn\AttestationStatement\AttestationStatementSupportManager">
             <configurator service="Reply\WebAuthn\Bridge\AttestationStatementSupportManagerConfigurator"/>
@@ -101,6 +102,19 @@
             <argument id="Webauthn\TokenBinding\TokenBindingNotSupportedHandler" type="service"/>
             <argument id="Webauthn\AuthenticationExtensions\ExtensionOutputCheckerHandler" type="service"/>
             <argument id="Cose\Algorithm\Manager" type="service"/>
+        </service>
+
+        <service id="Webauthn\AttestationStatement\NoneAttestationStatementSupport">
+            <tag name="reply.webauthn.supported_attestation_statement"/>
+        </service>
+        <service id="Webauthn\AttestationStatement\FidoU2FAttestationStatementSupport">
+            <tag name="reply.webauthn.supported_attestation_statement"/>
+        </service>
+        <service id="Webauthn\AttestationStatement\AndroidKeyAttestationStatementSupport">
+            <tag name="reply.webauthn.supported_attestation_statement"/>
+        </service>
+        <service id="Webauthn\AttestationStatement\TPMAttestationStatementSupport">
+            <tag name="reply.webauthn.supported_attestation_statement"/>
         </service>
     </services>
 </container>
