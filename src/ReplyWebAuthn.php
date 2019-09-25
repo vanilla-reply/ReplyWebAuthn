@@ -33,18 +33,10 @@ class ReplyWebAuthn extends Plugin
         $this->clearConfig($connection);
     }
 
-    private function getSystemConfigService(): SystemConfigService
-    {
-        return new SystemConfigService(
-            $this->container->get(Connection::class),
-            $this->container->get('system_config.repository')
-        );
-    }
-
     private function writeDefaultConfig(): void
     {
         $config = new Configuration([]);
-        $systemConfigService = $this->getSystemConfigService();
+        $systemConfigService = $this->container->get(SystemConfigService::class);
 
         foreach ($config->getIterator() as $key => $value) {
             $prefixedKey = self::CONFIG_PREFIX . '.' .  $key;

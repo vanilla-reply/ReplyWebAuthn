@@ -76,8 +76,8 @@
 
         <input-field type="int">
             <name>timeout</name>
-            <label>Timeout</label>
-            <label lang="de-DE">Timeout</label>
+            <label>Timeout (in seconds)</label>
+            <label lang="de-DE">Timeout (in Sekunden)</label>
         </input-field>
 
         <input-field type="bool">

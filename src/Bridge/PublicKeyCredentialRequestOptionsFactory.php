@@ -27,7 +27,7 @@ class PublicKeyCredentialRequestOptionsFactory
 
         return new PublicKeyCredentialRequestOptions(
             Challenge::generate(),
-            $config->getTimeout(),
+            $config->getTimeout() * 1000,
             $hostname,
             $descriptors,
             $config->getUserVerification()

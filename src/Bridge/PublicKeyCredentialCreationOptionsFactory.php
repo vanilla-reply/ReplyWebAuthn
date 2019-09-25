@@ -68,7 +68,7 @@ class PublicKeyCredentialCreationOptionsFactory
             $userEntity,
             Challenge::generate(),
             $publicKeyCredentialParametersList,
-            $config->getTimeout(),
+            $config->getTimeout() * 1000,
             [],
             $authenticatorSelectionCriteria,
             $config->getAttestation(),

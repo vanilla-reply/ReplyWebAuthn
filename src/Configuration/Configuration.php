@@ -13,7 +13,7 @@ class Configuration implements \IteratorAggregate
     private $values;
 
     private static $defaults = [
-        'timeout' => 20000,
+        'timeout' => 20,
         'attestation' => PublicKeyCredentialCreationOptions::ATTESTATION_CONVEYANCE_PREFERENCE_DIRECT,
         'userVerification' => AuthenticatorSelectionCriteria::USER_VERIFICATION_REQUIREMENT_PREFERRED,
         'requireResidentKey' => false,
