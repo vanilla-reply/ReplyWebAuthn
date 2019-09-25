@@ -1,6 +1,7 @@
 import Plugin from 'src/script/plugin-system/plugin.class';
 import HttpClient from 'src/script/service/http-client.service';
 import EncodingHelper from '../helper/encoding.helper';
+import PageLoadingIndicatorUtil from 'src/script/utility/loading-indicator/page-loading-indicator.util';
 
 export default class CreateCredentialPlugin extends Plugin {
 
@@ -35,6 +36,7 @@ export default class CreateCredentialPlugin extends Plugin {
      * @private
      */
     _getOptions() {
+        PageLoadingIndicatorUtil.create();
         this._sendRequest(this.options.initUrl, {}, this._createCredential.bind(this));
     }
 
@@ -45,6 +47,7 @@ export default class CreateCredentialPlugin extends Plugin {
 
         navigator.credentials.create({publicKey: options})
             .then(this._promptUserForName.bind(this), error => {
+                PageLoadingIndicatorUtil.remove();
                 console.log(error.toString()); // Example: timeout, interaction refused...
             });
     }
@@ -52,6 +55,10 @@ export default class CreateCredentialPlugin extends Plugin {
     _promptUserForName(authenticatorData) {
         const credential = this._convertAuthenticatorData(authenticatorData);
         credential.name = window.prompt('Please enter a name for this credential', '');
+        if (!credential.name) {
+            PageLoadingIndicatorUtil.remove();
+            return;
+        }
 
         this._saveCredential(credential);
     }

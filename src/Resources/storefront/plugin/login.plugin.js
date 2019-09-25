@@ -1,7 +1,8 @@
 import Plugin from 'src/script/plugin-system/plugin.class';
 import HttpClient from 'src/script/service/http-client.service';
 import FormSerializeUtil from 'src/script/utility/form/form-serialize.util';
-import EncodingHelper from '../helper/encoding.helper';
+import EncodingHelper from '../helper/encoding.helper'
+import PageLoadingIndicatorUtil from 'src/script/utility/loading-indicator/page-loading-indicator.util';
 
 export default class LoginPlugin extends Plugin {
 
@@ -59,6 +60,7 @@ export default class LoginPlugin extends Plugin {
         }
 
         event.preventDefault();
+        PageLoadingIndicatorUtil.create();
         console.log('Requesting login options from server');
         this._sendRequest(this.options.loginOptionsUrl, {username: data.username}, this._getCredential.bind(this));
     }
@@ -70,6 +72,7 @@ export default class LoginPlugin extends Plugin {
 
         navigator.credentials.get({publicKey: options})
             .then(this._sendLoginRequest.bind(this), error => {
+                PageLoadingIndicatorUtil.remove();
                 console.log(error.toString()); // Example: timeout, interaction refused...
             });
     }
@@ -87,6 +90,7 @@ export default class LoginPlugin extends Plugin {
         if (formData.redirectPath) {
             window.location = formData.redirectPath;
         }
+        PageLoadingIndicatorUtil.remove();
         console.log('handleLoginResponse', response);
     }
 
