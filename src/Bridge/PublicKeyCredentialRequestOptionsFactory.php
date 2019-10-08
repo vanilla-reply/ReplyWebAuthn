@@ -2,20 +2,23 @@
 
 namespace Reply\WebAuthn\Bridge;
 
-use Reply\WebAuthn\Configuration\ConfigurationService;
+use Reply\WebAuthn\Configuration\ConfigurationReader;
 use Webauthn\PublicKeyCredentialDescriptor;
 use Webauthn\PublicKeyCredentialRequestOptions;
 
 class PublicKeyCredentialRequestOptionsFactory
 {
     /**
-     * @var ConfigurationService
+     * @var ConfigurationReader
      */
-    private $configService;
+    private $configurationReader;
 
-    public function __construct(ConfigurationService $configService)
+    /**
+     * @param ConfigurationReader $configurationReader
+     */
+    public function __construct(ConfigurationReader $configurationReader)
     {
-        $this->configService = $configService;
+        $this->configurationReader = $configurationReader;
     }
 
     /**
@@ -23,7 +26,7 @@ class PublicKeyCredentialRequestOptionsFactory
      */
     public function create(string $hostname, array $descriptors): PublicKeyCredentialRequestOptions
     {
-        $config = $this->configService->get();
+        $config = $this->configurationReader->read();
 
         return new PublicKeyCredentialRequestOptions(
             Challenge::generate(),

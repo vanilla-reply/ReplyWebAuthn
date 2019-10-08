@@ -45,7 +45,7 @@
         </service>
 
         <!-- Configuration services -->
-        <service id="Reply\WebAuthn\Configuration\ConfigurationService" public="true">
+        <service id="Reply\WebAuthn\Configuration\ConfigurationReader" public="true">
             <argument id="Shopware\Core\System\SystemConfig\SystemConfigService" type="service"/>
         </service>
 
@@ -53,7 +53,7 @@
         <service id="Reply\WebAuthn\Bridge\PublicKeyCredentialDescriptorFakeFactory"/>
 
         <service id="Reply\WebAuthn\Bridge\AttestationStatementSupportManagerConfigurator">
-            <argument id="Reply\WebAuthn\Configuration\ConfigurationService" type="service"/>
+            <argument id="Reply\WebAuthn\Configuration\ConfigurationReader" type="service"/>
             <argument type="tagged" tag="reply.webauthn.supported_attestation_statement"/>
         </service>
         <service id="Webauthn\AttestationStatement\AttestationStatementSupportManager">
@@ -76,7 +76,7 @@
         <service id="Webauthn\AuthenticationExtensions\ExtensionOutputCheckerHandler"/>
 
         <service id="Reply\WebAuthn\Bridge\CoseAlgorithmManagerConfigurator">
-            <argument id="Reply\WebAuthn\Configuration\ConfigurationService" type="service"/>
+            <argument id="Reply\WebAuthn\Configuration\ConfigurationReader" type="service"/>
             <argument type="tagged" tag="reply.webauthn.algorithm"/>
         </service>
         <service id="Cose\Algorithm\Manager">
@@ -85,11 +85,11 @@
 
         <service id="Reply\WebAuthn\Bridge\PublicKeyCredentialCreationOptionsFactory">
             <argument id="Cose\Algorithm\Manager" type="service"/>
-            <argument id="Reply\WebAuthn\Configuration\ConfigurationService" type="service"/>
+            <argument id="Reply\WebAuthn\Configuration\ConfigurationReader" type="service"/>
         </service>
 
         <service id="Reply\WebAuthn\Bridge\PublicKeyCredentialRequestOptionsFactory">
-            <argument id="Reply\WebAuthn\Configuration\ConfigurationService" type="service"/>
+            <argument id="Reply\WebAuthn\Configuration\ConfigurationReader" type="service"/>
         </service>
 
         <service id="Webauthn\AuthenticatorAttestationResponseValidator">

@@ -4,15 +4,15 @@ namespace Reply\WebAuthn\Bridge;
 
 use Cose\Algorithm\Algorithm;
 use Cose\Algorithm\Manager;
-use Reply\WebAuthn\Configuration\ConfigurationService;
+use Reply\WebAuthn\Configuration\ConfigurationReader;
 use Reply\WebAuthn\Exception\UnsupportedAlgorithmException;
 
 class CoseAlgorithmManagerConfigurator
 {
     /**
-     * @var ConfigurationService
+     * @var ConfigurationReader
      */
-    private $configurationService;
+    private $configurationReader;
 
     /**
      * @var Algorithm[]
@@ -20,12 +20,12 @@ class CoseAlgorithmManagerConfigurator
     private $supportedTypes;
 
     /**
-     * @param ConfigurationService $configurationService
+     * @param ConfigurationReader $configurationReader
      * @param Algorithm[] $supportedTypes
      */
-    public function __construct(ConfigurationService $configurationService, iterable $supportedTypes)
+    public function __construct(ConfigurationReader $configurationReader, iterable $supportedTypes)
     {
-        $this->configurationService = $configurationService;
+        $this->configurationReader = $configurationReader;
         $this->supportedTypes = [];
         foreach ($supportedTypes as $supportedType) {
             $this->supportedTypes[get_class($supportedType)] = $supportedType;
@@ -35,9 +35,9 @@ class CoseAlgorithmManagerConfigurator
     /**
      * @param Manager $manager
      */
-    public function __invoke(Manager $manager)
+    public function __invoke(Manager $manager): void
     {
-        $config = $this->configurationService->get();
+        $config = $this->configurationReader->read();
         foreach ($config->getAlgorithms() as $className) {
             $manager->add($this->getByClassName($className));
         }

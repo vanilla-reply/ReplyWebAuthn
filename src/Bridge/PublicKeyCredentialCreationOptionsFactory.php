@@ -3,7 +3,7 @@
 namespace Reply\WebAuthn\Bridge;
 
 use Cose\Algorithm\Manager;
-use Reply\WebAuthn\Configuration\ConfigurationService;
+use Reply\WebAuthn\Configuration\ConfigurationReader;
 use Webauthn\AuthenticatorSelectionCriteria;
 use Webauthn\PublicKeyCredentialCreationOptions;
 use Webauthn\PublicKeyCredentialDescriptor;
@@ -19,16 +19,26 @@ class PublicKeyCredentialCreationOptionsFactory
     private $algorithmManager;
 
     /**
-     * @var ConfigurationService
+     * @var ConfigurationReader
      */
-    private $configService;
+    private $configurationReader;
 
-    public function __construct(Manager $algorithmManager, ConfigurationService $configService)
+    /**
+     * @param Manager $algorithmManager
+     * @param ConfigurationReader $configurationReader
+     */
+    public function __construct(Manager $algorithmManager, ConfigurationReader $configurationReader)
     {
         $this->algorithmManager = $algorithmManager;
-        $this->configService = $configService;
+        $this->configurationReader = $configurationReader;
     }
 
+    /**
+     * @param string $hostName
+     * @param string $userName
+     * @param string $userId
+     * @return PublicKeyCredentialCreationOptions
+     */
     public function create(string $hostName, string $userName, string $userId): PublicKeyCredentialCreationOptions
     {
         // RP Entity
@@ -55,7 +65,7 @@ class PublicKeyCredentialCreationOptionsFactory
             );
         }
 
-        $config = $this->configService->get();
+        $config = $this->configurationReader->read();
 
         $authenticatorSelectionCriteria = new AuthenticatorSelectionCriteria(
             null,

@@ -2,7 +2,7 @@
 
 namespace Reply\WebAuthn\Bridge;
 
-use Reply\WebAuthn\Configuration\ConfigurationService;
+use Reply\WebAuthn\Configuration\ConfigurationReader;
 use Reply\WebAuthn\Exception\UnsupportedAttestationStatementTypeException;
 use Webauthn\AttestationStatement\AttestationStatementSupport;
 use Webauthn\AttestationStatement\AttestationStatementSupportManager;
@@ -10,9 +10,9 @@ use Webauthn\AttestationStatement\AttestationStatementSupportManager;
 class AttestationStatementSupportManagerConfigurator
 {
     /**
-     * @var ConfigurationService
+     * @var ConfigurationReader
      */
-    private $configService;
+    private $configurationReader;
 
     /**
      * @var AttestationStatementSupport[]|array
@@ -20,26 +20,34 @@ class AttestationStatementSupportManagerConfigurator
     private $supportedTypes;
 
     /**
-     * @param ConfigurationService $configService
+     * @param ConfigurationReader $configurationReader
      * @param AttestationStatementSupport[] $supportedTypes
      */
-    public function __construct(ConfigurationService $configService, iterable $supportedTypes)
+    public function __construct(ConfigurationReader $configurationReader, iterable $supportedTypes)
     {
-        $this->configService = $configService;
+        $this->configurationReader = $configurationReader;
         $this->supportedTypes = [];
         foreach ($supportedTypes as $supportedType) {
             $this->supportedTypes[$supportedType->name()] = $supportedType;
         }
     }
 
+    /**
+     * @param AttestationStatementSupportManager $manager
+     */
     public function __invoke(AttestationStatementSupportManager $manager): void
     {
-        $config = $this->configService->get();
+        $config = $this->configurationReader->read();
         foreach ($config->getAttestationStatementFormats() as $formatName) {
             $manager->add($this->getTypeByName($formatName));
         }
     }
 
+    /**
+     * @param string $name
+     * @return AttestationStatementSupport
+     * @throws UnsupportedAttestationStatementTypeException
+     */
     private function getTypeByName(string $name): AttestationStatementSupport
     {
         if (!isset($this->supportedTypes[$name])) {

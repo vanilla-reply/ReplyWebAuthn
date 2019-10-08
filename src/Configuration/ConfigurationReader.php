@@ -5,7 +5,7 @@ namespace Reply\WebAuthn\Configuration;
 use Reply\WebAuthn\ReplyWebAuthn;
 use Shopware\Core\System\SystemConfig\SystemConfigService;
 
-class ConfigurationService
+class ConfigurationReader
 {
     /**
      * @var SystemConfigService
@@ -17,7 +17,7 @@ class ConfigurationService
         $this->systemConfigService = $systemConfigService;
     }
 
-    public function get(): Configuration
+    public function read(): Configuration
     {
         return new Configuration($this->systemConfigService->get(ReplyWebAuthn::CONFIG_PREFIX) ?? []);
     }
