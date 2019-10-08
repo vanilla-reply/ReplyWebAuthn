@@ -4,39 +4,56 @@ namespace Reply\WebAuthn\Bridge;
 
 use Cose\Algorithm\Algorithm;
 use Cose\Algorithm\Manager;
-use Cose\Algorithm\Signature\ECDSA\ES256;
-use Cose\Algorithm\Signature\ECDSA\ES256K;
-use Cose\Algorithm\Signature\ECDSA\ES384;
-use Cose\Algorithm\Signature\ECDSA\ES512;
-use Cose\Algorithm\Signature\RSA\RS1;
-use Cose\Algorithm\Signature\RSA\RS256;
-use Cose\Algorithm\Signature\RSA\RS384;
-use Cose\Algorithm\Signature\RSA\RS512;
+use Reply\WebAuthn\Configuration\ConfigurationService;
+use Reply\WebAuthn\Exception\UnsupportedAlgorithmException;
 
 class CoseAlgorithmManagerConfigurator
 {
-    public function __invoke(Manager $manager)
+    /**
+     * @var ConfigurationService
+     */
+    private $configurationService;
+
+    /**
+     * @var Algorithm[]
+     */
+    private $supportedTypes;
+
+    /**
+     * @param ConfigurationService $configurationService
+     * @param Algorithm[] $supportedTypes
+     */
+    public function __construct(ConfigurationService $configurationService, iterable $supportedTypes)
     {
-        // TODO: Make algorithms configurable
-        foreach ($this->getSupportedAlgorithms() as $algorithm) {
-            $manager->add($algorithm);
+        $this->configurationService = $configurationService;
+        $this->supportedTypes = [];
+        foreach ($supportedTypes as $supportedType) {
+            $this->supportedTypes[get_class($supportedType)] = $supportedType;
         }
     }
 
     /**
-     * @return Algorithm[]
+     * @param Manager $manager
      */
-    private function getSupportedAlgorithms(): array
+    public function __invoke(Manager $manager)
     {
-        return [
-            new ES256(),
-            new ES256K(),
-            new ES384(),
-            new ES512(),
-            new RS1(),
-            new RS256(),
-            new RS384(),
-            new RS512()
-        ];
+        $config = $this->configurationService->get();
+        foreach ($config->getAlgorithms() as $className) {
+            $manager->add($this->getByClassName($className));
+        }
+    }
+
+    /**
+     * @param string $className
+     * @return Algorithm
+     * @throws UnsupportedAlgorithmException
+     */
+    private function getByClassName(string $className): Algorithm
+    {
+        if (!isset($this->supportedTypes[$className])) {
+            throw new UnsupportedAlgorithmException($className);
+        }
+
+        return $this->supportedTypes[$className];
     }
 }

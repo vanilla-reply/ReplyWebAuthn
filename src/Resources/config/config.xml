@@ -74,6 +74,37 @@
             </options>
         </input-field>
 
+        <input-field type="multi-select">
+            <name>algorithms</name>
+            <label>Algorithms</label>
+            <options>
+                <option>
+                    <id>Cose\Algorithm\Signature\ECDSA\ES256</id>
+                    <name>ES256</name>
+                </option>
+                <option>
+                    <id>Cose\Algorithm\Signature\ECDSA\ES384</id>
+                    <name>ES384</name>
+                </option>
+                <option>
+                    <id>Cose\Algorithm\Signature\ECDSA\ES512</id>
+                    <name>ES512</name>
+                </option>
+                <option>
+                    <id>Cose\Algorithm\Signature\RSA\RS256</id>
+                    <name>RS256</name>
+                </option>
+                <option>
+                    <id>Cose\Algorithm\Signature\RSA\RS384</id>
+                    <name>RS384</name>
+                </option>
+                <option>
+                    <id>Cose\Algorithm\Signature\RSA\RS512</id>
+                    <name>RS512</name>
+                </option>
+            </options>
+        </input-field>
+
         <input-field type="int">
             <name>timeout</name>
             <label>Timeout (in seconds)</label>

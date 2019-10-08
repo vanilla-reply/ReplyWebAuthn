@@ -75,7 +75,10 @@
         <service id="Webauthn\TokenBinding\TokenBindingNotSupportedHandler"/>
         <service id="Webauthn\AuthenticationExtensions\ExtensionOutputCheckerHandler"/>
 
-        <service id="Reply\WebAuthn\Bridge\CoseAlgorithmManagerConfigurator"/>
+        <service id="Reply\WebAuthn\Bridge\CoseAlgorithmManagerConfigurator">
+            <argument id="Reply\WebAuthn\Configuration\ConfigurationService" type="service"/>
+            <argument type="tagged" tag="reply.webauthn.algorithm"/>
+        </service>
         <service id="Cose\Algorithm\Manager">
             <configurator service="Reply\WebAuthn\Bridge\CoseAlgorithmManagerConfigurator"/>
         </service>
@@ -115,6 +118,25 @@
         </service>
         <service id="Webauthn\AttestationStatement\TPMAttestationStatementSupport">
             <tag name="reply.webauthn.supported_attestation_statement"/>
+        </service>
+
+        <service id="Cose\Algorithm\Signature\RSA\RS256">
+            <tag name="reply.webauthn.algorithm"/>
+        </service>
+        <service id="Cose\Algorithm\Signature\RSA\RS384">
+            <tag name="reply.webauthn.algorithm"/>
+        </service>
+        <service id="Cose\Algorithm\Signature\RSA\RS512">
+            <tag name="reply.webauthn.algorithm"/>
+        </service>
+        <service id="Cose\Algorithm\Signature\ECDSA\ES256">
+            <tag name="reply.webauthn.algorithm"/>
+        </service>
+        <service id="Cose\Algorithm\Signature\ECDSA\ES384">
+            <tag name="reply.webauthn.algorithm"/>
+        </service>
+        <service id="Cose\Algorithm\Signature\ECDSA\ES512">
+            <tag name="reply.webauthn.algorithm"/>
         </service>
     </services>
 </container>
