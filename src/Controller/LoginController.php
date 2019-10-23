@@ -86,6 +86,9 @@ class LoginController extends AbstractController
     public function init(Request $request, SalesChannelContext $context): Response
     {
         $username = $request->request->get('username');
+        if (empty($username)) {
+            return $this->createErrorResponse('Missing request parameter "username"');
+        }
 
         try {
             $customer = $this->accountService->getCustomerByEmail($username, $context);
@@ -111,16 +114,15 @@ class LoginController extends AbstractController
      */
     public function finalize(Request $request, SalesChannelContext $context): Response
     {
-        //$credential = $this->credentialLoader->loadArray($request->request->all());
         $credential = $this->credentialLoader->load($request->getContent());
 
         if (!$credential->getResponse() instanceof AuthenticatorAssertionResponse) {
-            return $this->denyAccess('Response is not an AuthenticatorAssertionResponse');
+            return $this->createErrorResponse('Authenticator response does not contain assertion.');
         }
 
         $requestOptionsJson = $this->getSession()->get(self::REQUEST_OPTIONS_SESSION_KEY);
         if (!is_string($requestOptionsJson)) {
-            return $this->denyAccess('Missing request options');
+            return $this->createErrorResponse('Login has not been initialized properly.');
         }
 
         $username = $this->getSession()->get(self::USERNAME_SESSION_KEY);

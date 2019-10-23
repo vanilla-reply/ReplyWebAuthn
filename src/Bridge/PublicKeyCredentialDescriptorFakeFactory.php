@@ -2,7 +2,7 @@
 
 namespace Reply\WebAuthn\Bridge;
 
-use RuntimeException;
+use Reply\WebAuthn\Exception\InvalidConfigurationException;
 use Webauthn\PublicKeyCredentialDescriptor;
 
 class PublicKeyCredentialDescriptorFakeFactory
@@ -11,7 +11,7 @@ class PublicKeyCredentialDescriptorFakeFactory
     {
         $salt = getenv('APP_SECRET');
         if (!is_string($salt) || empty($salt)) {
-            throw new RuntimeException('Invalid value for environment variable APP_SECRET');
+            throw new InvalidConfigurationException('Invalid value for environment variable APP_SECRET');
         }
 
         $hash = hash('sha512', $salt . $username);

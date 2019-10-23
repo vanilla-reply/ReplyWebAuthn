@@ -117,12 +117,12 @@ class AccountCredentialController extends AbstractController
         $response = $credential->getResponse();
 
         if (!$response instanceof AuthenticatorAttestationResponse) {
-            return $this->denyAccess('Not an authenticator attestation response');
+            return $this->createErrorResponse('Authenticator response does not contain attestation.');
         }
 
         $creationOptionsJson = $this->getSession()->get(self::CREATION_OPTIONS_SESSION_KEY);
         if (!is_string($creationOptionsJson)) {
-            return $this->denyAccess('Cannot find valid credential creation options');
+            return $this->createErrorResponse('Saving credential has not been initialized properly.');
         }
 
         /** @var PublicKeyCredentialCreationOptions $creationOptions */

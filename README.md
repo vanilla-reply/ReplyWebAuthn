@@ -18,6 +18,8 @@ TODO
 * [x] Passwordless login for customers in Storefront
 * [x] Key administration for customers in Storefront
 * [ ] Passwordless login for admin users
+* [ ] Support different configurations for each sales channel
+
 
 ### FAQ
 

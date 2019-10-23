@@ -13,8 +13,8 @@ abstract class AbstractController extends StorefrontController
         return $this->container->get('session');
     }
 
-    protected function denyAccess(string $message): JsonResponse
+    protected function createErrorResponse(string $message, int $status = 400): JsonResponse
     {
-        return new JsonResponse($message, 400);
+        return new JsonResponse(['message' => $message], $status);
     }
 }
