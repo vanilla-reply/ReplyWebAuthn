@@ -2,6 +2,7 @@
 
 namespace Reply\WebAuthn\Bridge;
 
+use Shopware\Core\Checkout\Customer\CustomerEntity;
 use Webauthn\PublicKeyCredentialSource;
 use Webauthn\PublicKeyCredentialSourceRepository;
 
@@ -11,6 +12,12 @@ interface CustomerCredentialRepository extends PublicKeyCredentialSourceReposito
      * @return PublicKeyCredentialSource[]
      */
     public function findAllByCustomerId(string $customerId): array;
+
+    /**
+     * @param CustomerEntity $customerEntity
+     * @return PublicKeyCredentialSource[]
+     */
+    public function findAllByCustomer(CustomerEntity $customerEntity): array;
 
     /**
      * @param string $credentialId

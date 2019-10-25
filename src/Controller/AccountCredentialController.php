@@ -153,7 +153,7 @@ class AccountCredentialController extends AbstractController
 
         $credentialId = Base64Url::decode($credentialId);
         $credential = $this->credentialRepository->findOneByCredentialId($credentialId);
-        if ($credential === null || $credential->getUserHandle() !== $salesChannelContext->getCustomer()->getId()) {
+        if ($credential === null || bin2hex($credential->getUserHandle()) !== $salesChannelContext->getCustomer()->getId()) {
             return $this->redirectToRoute('frontend.account.credential.page');
         }
 

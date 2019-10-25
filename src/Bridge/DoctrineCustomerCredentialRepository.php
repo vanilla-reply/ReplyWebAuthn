@@ -6,6 +6,7 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Driver\ResultStatement;
 use Doctrine\DBAL\FetchMode;
 use Ramsey\Uuid\Uuid;
+use Shopware\Core\Checkout\Customer\CustomerEntity;
 use Webauthn\PublicKeyCredentialSource;
 use Webauthn\PublicKeyCredentialSourceRepository;
 use Webauthn\PublicKeyCredentialUserEntity;
@@ -82,7 +83,7 @@ class DoctrineCustomerCredentialRepository implements PublicKeyCredentialSourceR
         $query->select('*')
             ->from(self::TABLE_NAME)
             ->where('customer_id = :id')
-            ->setParameter('id', hex2bin($customerId));
+            ->setParameter('id', $customerId);
 
         /** @var ResultStatement $result */
         $result = $query->execute();
@@ -91,6 +92,15 @@ class DoctrineCustomerCredentialRepository implements PublicKeyCredentialSourceR
         return array_map(function (array $row) {
             return $this->hydrate($row);
         }, $values);
+    }
+
+    /**
+     * @param CustomerEntity $customerEntity
+     * @return PublicKeyCredentialSource[]
+     */
+    public function findAllByCustomer(CustomerEntity $customerEntity): array
+    {
+        return $this->findAllByCustomerId(hex2bin($customerEntity->getId()));
     }
 
     /**
@@ -109,7 +119,7 @@ class DoctrineCustomerCredentialRepository implements PublicKeyCredentialSourceR
     public function deleteByCustomerId(string $customerId): void
     {
         $this->connection->delete(self::TABLE_NAME, [
-            'customer_id' => hex2bin($customerId)
+            'customer_id' => $customerId
         ]);
     }
 
@@ -127,7 +137,7 @@ class DoctrineCustomerCredentialRepository implements PublicKeyCredentialSourceR
             TrustPathLoader::loadTrustPath(json_decode($values['trust_path'], true)),
             Uuid::fromString($values['aaguid']),
             $values['public_key'],
-            bin2hex($values['customer_id']),
+            $values['customer_id'],
             (int)$values['counter']
         );
 
@@ -156,7 +166,7 @@ class DoctrineCustomerCredentialRepository implements PublicKeyCredentialSourceR
             'trust_path' => json_encode($publicKeyCredentialSource->getTrustPath()),
             'aaguid' => $publicKeyCredentialSource->getAaguid()->toString(),
             'public_key' => $publicKeyCredentialSource->getCredentialPublicKey(),
-            'customer_id' => hex2bin($publicKeyCredentialSource->getUserHandle()),
+            'customer_id' => $publicKeyCredentialSource->getUserHandle(),
             'counter' => $publicKeyCredentialSource->getCounter(),
             'created_at' => date($this->connection->getDatabasePlatform()->getDateTimeFormatString())
         ];
