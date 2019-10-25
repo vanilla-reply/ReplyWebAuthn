@@ -3,8 +3,9 @@
 namespace Reply\WebAuthn\Bridge;
 
 use Webauthn\PublicKeyCredentialSource;
+use Webauthn\PublicKeyCredentialSourceRepository;
 
-interface CustomerCredentialRepository extends \Webauthn\PublicKeyCredentialSourceRepository
+interface CustomerCredentialRepository extends PublicKeyCredentialSourceRepository
 {
     /**
      * @return PublicKeyCredentialSource[]
