@@ -6,6 +6,9 @@ use Shopware\Core\Framework\ShopwareHttpException;
 
 class InvalidConfigurationException extends ShopwareHttpException
 {
+    /**
+     * @return string
+     */
     public function getErrorCode(): string
     {
         return 'WEBAUTHN__INVALID_CONFIGURATION';

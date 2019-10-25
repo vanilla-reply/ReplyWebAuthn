@@ -57,6 +57,14 @@ class AccountCredentialController extends AbstractController
      */
     private $httpMessageFactory;
 
+    /**
+     * @param AccountCredentialPageLoader $pageLoader
+     * @param PublicKeyCredentialCreationOptionsFactory $creationOptionsFactory
+     * @param CustomerCredentialRepository $credentialRepository
+     * @param PublicKeyCredentialLoader $credentialLoader
+     * @param AuthenticatorAttestationResponseValidator $authenticatorAttestationResponseValidator
+     * @param HttpMessageFactoryInterface $httpMessageFactory
+     */
     public function __construct(
         AccountCredentialPageLoader $pageLoader,
         PublicKeyCredentialCreationOptionsFactory $creationOptionsFactory,

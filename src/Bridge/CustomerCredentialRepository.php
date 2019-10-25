@@ -11,7 +11,13 @@ interface CustomerCredentialRepository extends \Webauthn\PublicKeyCredentialSour
      */
     public function findAllByCustomerId(string $customerId): array;
 
+    /**
+     * @param string $credentialId
+     */
     public function deleteById(string $credentialId): void;
 
+    /**
+     * @param string $customerId
+     */
     public function deleteByCustomerId(string $customerId): void;
 }

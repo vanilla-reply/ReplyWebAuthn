@@ -20,11 +20,18 @@ class DoctrineCustomerCredentialRepository implements PublicKeyCredentialSourceR
      */
     private $connection;
 
+    /**
+     * @param Connection $connection
+     */
     public function __construct(Connection $connection)
     {
         $this->connection = $connection;
     }
 
+    /**
+     * @param string $publicKeyCredentialId
+     * @return PublicKeyCredentialSource|null
+     */
     public function findOneByCredentialId(string $publicKeyCredentialId): ?PublicKeyCredentialSource
     {
         $query = $this->connection->createQueryBuilder();
@@ -52,6 +59,9 @@ class DoctrineCustomerCredentialRepository implements PublicKeyCredentialSourceR
         return $this->findAllByCustomerId($publicKeyCredentialUserEntity->getId());
     }
 
+    /**
+     * @param PublicKeyCredentialSource $publicKeyCredentialSource
+     */
     public function saveCredentialSource(PublicKeyCredentialSource $publicKeyCredentialSource): void
     {
         if ($this->exists($publicKeyCredentialSource->getPublicKeyCredentialId())) {
@@ -83,6 +93,9 @@ class DoctrineCustomerCredentialRepository implements PublicKeyCredentialSourceR
         }, $values);
     }
 
+    /**
+     * @param string $credentialId
+     */
     public function deleteById(string $credentialId): void
     {
         $this->connection->delete(self::TABLE_NAME, [
@@ -90,6 +103,9 @@ class DoctrineCustomerCredentialRepository implements PublicKeyCredentialSourceR
         ]);
     }
 
+    /**
+     * @param string $customerId
+     */
     public function deleteByCustomerId(string $customerId): void
     {
         $this->connection->delete(self::TABLE_NAME, [
@@ -97,6 +113,10 @@ class DoctrineCustomerCredentialRepository implements PublicKeyCredentialSourceR
         ]);
     }
 
+    /**
+     * @param array $values
+     * @return NamedCredential
+     */
     private function hydrate(array $values): NamedCredential
     {
         $source = new PublicKeyCredentialSource(
@@ -114,11 +134,18 @@ class DoctrineCustomerCredentialRepository implements PublicKeyCredentialSourceR
         return new NamedCredential($source, $values['name']);
     }
 
+    /**
+     * @param string $credentialId
+     * @return bool
+     */
     private function exists(string $credentialId): bool
     {
         return $this->findOneByCredentialId($credentialId) !== null;
     }
 
+    /**
+     * @param PublicKeyCredentialSource $publicKeyCredentialSource
+     */
     private function insert(PublicKeyCredentialSource $publicKeyCredentialSource): void
     {
         $data = [
@@ -139,6 +166,9 @@ class DoctrineCustomerCredentialRepository implements PublicKeyCredentialSourceR
         $this->connection->insert(self::TABLE_NAME, $data);
     }
 
+    /**
+     * @param PublicKeyCredentialSource $publicKeyCredentialSource
+     */
     private function update(PublicKeyCredentialSource $publicKeyCredentialSource): void
     {
         $data = [

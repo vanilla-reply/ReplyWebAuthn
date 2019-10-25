@@ -11,6 +11,10 @@ class NamedCredential extends PublicKeyCredentialSource
      */
     protected $name;
 
+    /**
+     * @param PublicKeyCredentialSource $publicKeyCredentialSource
+     * @param string $name
+     */
     public function __construct(PublicKeyCredentialSource $publicKeyCredentialSource, string $name)
     {
         parent::__construct(
@@ -43,6 +47,9 @@ class NamedCredential extends PublicKeyCredentialSource
         $this->name = $name;
     }
 
+    /**
+     * @return array
+     */
     public function jsonSerialize(): array
     {
         $values = parent::jsonSerialize();

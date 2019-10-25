@@ -14,12 +14,18 @@ class ReplyWebAuthn extends Plugin
 {
     public const CONFIG_PREFIX = 'ReplyWebAuthn.config';
 
+    /**
+     * @param InstallContext $installContext
+     */
     public function install(InstallContext $installContext): void
     {
         parent::install($installContext);
         $this->writeDefaultConfig();
     }
 
+    /**
+     * @param UninstallContext $context
+     */
     public function uninstall(UninstallContext $context): void
     {
         parent::uninstall($context);
@@ -33,6 +39,9 @@ class ReplyWebAuthn extends Plugin
         $this->clearConfig($connection);
     }
 
+    /**
+     * Writes default configuration
+     */
     private function writeDefaultConfig(): void
     {
         $config = new Configuration([]);
@@ -46,6 +55,9 @@ class ReplyWebAuthn extends Plugin
         }
     }
 
+    /**
+     * @param Connection $connection
+     */
     private function clearConfig(Connection $connection): void
     {
         $query = $connection->createQueryBuilder();
@@ -57,6 +69,9 @@ class ReplyWebAuthn extends Plugin
         $query->execute();
     }
 
+    /**
+     * @param Connection $connection
+     */
     private function dropTables(Connection $connection): void
     {
         foreach ($this->getTables() as $table) {
@@ -64,6 +79,9 @@ class ReplyWebAuthn extends Plugin
         }
     }
 
+    /**
+     * @return array
+     */
     private function getTables(): array
     {
         return [

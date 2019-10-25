@@ -41,14 +41,12 @@ class PublicKeyCredentialCreationOptionsFactory
      */
     public function create(string $hostName, string $userName, string $userId): PublicKeyCredentialCreationOptions
     {
-        // RP Entity
         $rpEntity = new PublicKeyCredentialRpEntity(
             $hostName,
             $hostName,
             null
         );
 
-        // User Entity
         $userEntity = new PublicKeyCredentialUserEntity(
             $userName,
             $userId,
@@ -56,7 +54,6 @@ class PublicKeyCredentialCreationOptionsFactory
             null
         );
 
-        // Public Key Credential Parameters
         $publicKeyCredentialParametersList = [];
         foreach ($this->algorithmManager->all() as $algorithm) {
             $publicKeyCredentialParametersList[] = new PublicKeyCredentialParameters(

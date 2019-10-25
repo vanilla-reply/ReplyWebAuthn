@@ -24,6 +24,11 @@ class AccountCredentialPageLoadedEvent extends NestedEvent
      */
     protected $request;
 
+    /**
+     * @param AccountCredentialPage $page
+     * @param SalesChannelContext $salesChannelContext
+     * @param Request $request
+     */
     public function __construct(AccountCredentialPage $page, SalesChannelContext $salesChannelContext, Request $request)
     {
         $this->page = $page;
@@ -31,21 +36,33 @@ class AccountCredentialPageLoadedEvent extends NestedEvent
         $this->request = $request;
     }
 
+    /**
+     * @return Context
+     */
     public function getContext(): Context
     {
         return $this->context->getContext();
     }
 
+    /**
+     * @return SalesChannelContext
+     */
     public function getSalesChannelContext(): SalesChannelContext
     {
         return $this->context;
     }
 
+    /**
+     * @return AccountCredentialPage
+     */
     public function getPage(): AccountCredentialPage
     {
         return $this->page;
     }
 
+    /**
+     * @return Request
+     */
     public function getRequest(): Request
     {
         return $this->request;

@@ -62,6 +62,15 @@ class LoginController extends AbstractController
      */
     private $httpMessageFactory;
 
+    /**
+     * @param AccountService $accountService
+     * @param CustomerCredentialRepository $credentialRepository
+     * @param PublicKeyCredentialDescriptorFakeFactory $fakeFactory
+     * @param PublicKeyCredentialRequestOptionsFactory $requestOptionsFactory
+     * @param PublicKeyCredentialLoader $credentialLoader
+     * @param AuthenticatorAssertionResponseValidator $authenticatorAssertionResponseValidator
+     * @param HttpMessageFactoryInterface $httpMessageFactory
+     */
     public function __construct(
         AccountService $accountService,
         CustomerCredentialRepository $credentialRepository,
@@ -82,6 +91,10 @@ class LoginController extends AbstractController
 
     /**
      * @Route("/account/webauthn/login/init", name="frontend.account.webauthn.login.init", methods={"POST"}, defaults={"XmlHttpRequest"=true})
+     *
+     * @param Request $request
+     * @param SalesChannelContext $context
+     * @return Response
      */
     public function init(Request $request, SalesChannelContext $context): Response
     {
@@ -111,6 +124,10 @@ class LoginController extends AbstractController
 
     /**
      * @Route("/account/webauthn/login/finalize", name="frontend.account.webauthn.login.finalize", methods={"POST"}, defaults={"XmlHttpRequest"=true})
+     *
+     * @param Request $request
+     * @param SalesChannelContext $context
+     * @return Response
      */
     public function finalize(Request $request, SalesChannelContext $context): Response
     {

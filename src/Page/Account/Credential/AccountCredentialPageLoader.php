@@ -29,6 +29,11 @@ class AccountCredentialPageLoader
      */
     private $eventDispatcher;
 
+    /**
+     * @param CustomerCredentialRepository $credentialRepository
+     * @param GenericPageLoader $genericLoader
+     * @param EventDispatcherInterface $eventDispatcher
+     */
     public function __construct(
         CustomerCredentialRepository $credentialRepository,
         GenericPageLoader $genericLoader,
@@ -40,10 +45,9 @@ class AccountCredentialPageLoader
     }
 
     /**
-     * @throws CategoryNotFoundException
-     * @throws CustomerNotLoggedInException
-     * @throws InconsistentCriteriaIdsException
-     * @throws MissingRequestParameterException
+     * @param Request $request
+     * @param SalesChannelContext $salesChannelContext
+     * @return AccountCredentialPage
      */
     public function load(Request $request, SalesChannelContext $salesChannelContext): AccountCredentialPage
     {

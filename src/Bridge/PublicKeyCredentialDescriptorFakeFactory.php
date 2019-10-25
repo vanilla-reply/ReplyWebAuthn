@@ -7,6 +7,11 @@ use Webauthn\PublicKeyCredentialDescriptor;
 
 class PublicKeyCredentialDescriptorFakeFactory
 {
+    /**
+     * @param string $username
+     * @return PublicKeyCredentialDescriptor
+     * @throws InvalidConfigurationException
+     */
     public function create(string $username): PublicKeyCredentialDescriptor
     {
         $salt = getenv('APP_SECRET');

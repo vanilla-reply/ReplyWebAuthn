@@ -12,11 +12,17 @@ class ConfigurationReader
      */
     private $systemConfigService;
 
+    /**
+     * @param SystemConfigService $systemConfigService
+     */
     public function __construct(SystemConfigService $systemConfigService)
     {
         $this->systemConfigService = $systemConfigService;
     }
 
+    /**
+     * @return Configuration
+     */
     public function read(): Configuration
     {
         return new Configuration($this->systemConfigService->get(ReplyWebAuthn::CONFIG_PREFIX) ?? []);
