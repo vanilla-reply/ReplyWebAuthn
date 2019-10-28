@@ -3,10 +3,8 @@
 namespace Reply\WebAuthn\Page\Account\Credential;
 
 use Reply\WebAuthn\Bridge\CustomerCredentialRepository;
+use Reply\WebAuthn\Bridge\EntityConverter;
 use Shopware\Core\Checkout\Cart\Exception\CustomerNotLoggedInException;
-use Shopware\Core\Content\Category\Exception\CategoryNotFoundException;
-use Shopware\Core\Framework\DataAbstractionLayer\Exception\InconsistentCriteriaIdsException;
-use Shopware\Core\Framework\Routing\Exception\MissingRequestParameterException;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Shopware\Storefront\Page\GenericPageLoader;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -59,9 +57,11 @@ class AccountCredentialPageLoader
 
         $page = AccountCredentialPage::createFrom($page);
 
-        $page->setCredentials(
-            $this->credentialRepository->findAllByCustomerId($salesChannelContext->getCustomer()->getId())
+        $credentials = $this->credentialRepository->findAllForUserEntity(
+            EntityConverter::toUserEntity($salesChannelContext->getCustomer())
         );
+
+        $page->setCredentials($credentials);
 
         $this->eventDispatcher->dispatch(
             new AccountCredentialPageLoadedEvent($page, $salesChannelContext, $request)

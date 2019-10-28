@@ -23,7 +23,7 @@ class Migration1567101825CustomerCredentials extends MigrationStep
         $connection->executeQuery('
             CREATE TABLE `customer_credential` (
               `id` binary(64) NOT NULL PRIMARY KEY,
-              `customer_id` binary(16),
+              `user_handle` binary(16),
               `name` varchar(255) NOT NULL,
               `type` varchar(255) NOT NULL,
               `transports` json NOT NULL,
@@ -34,7 +34,7 @@ class Migration1567101825CustomerCredentials extends MigrationStep
               `counter` int(11) NOT NULL,
               `created_at` datetime(3) NOT NULL,
               `updated_at` datetime(3),
-              CONSTRAINT `fk.customer_credential.customer_id` FOREIGN KEY (`customer_id`)
+              CONSTRAINT `fk.customer_credential.user_handle` FOREIGN KEY (`user_handle`)
                 REFERENCES `customer` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
               CONSTRAINT `uniq.customer_credential.public_key`
                 UNIQUE (`public_key`),

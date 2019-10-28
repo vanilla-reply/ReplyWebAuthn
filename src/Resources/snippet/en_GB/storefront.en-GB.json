@@ -7,7 +7,12 @@
             "credentialCreate": "Add",
             "credentialDeleteAll": "Delete all",
             "credentialDelete": "Delete",
-            "credentialEmpty": "No access keys registered"
+            "credentialEmpty": "No access keys registered",
+            "credentialColumns": {
+                "name": "Name",
+                "registeredAt": "Registered at",
+                "actions": "Actions"
+            }
         },
         "login": {
             "useWebAuthn": "Use security key"

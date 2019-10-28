@@ -4,7 +4,8 @@ namespace Reply\WebAuthn\Controller;
 
 use Base64Url\Base64Url;
 use Reply\WebAuthn\Bridge\CustomerCredentialRepository;
-use Reply\WebAuthn\Bridge\NamedCredential;
+use Reply\WebAuthn\Bridge\EntityConverter;
+use Reply\WebAuthn\Bridge\PublicKeyCredentialEntity;
 use Reply\WebAuthn\Bridge\PublicKeyCredentialCreationOptionsFactory;
 use Reply\WebAuthn\Page\Account\Credential\AccountCredentialPageLoader;
 use Shopware\Core\Checkout\Cart\Exception\CustomerNotLoggedInException;
@@ -19,6 +20,7 @@ use Webauthn\AuthenticatorAttestationResponse;
 use Webauthn\AuthenticatorAttestationResponseValidator;
 use Webauthn\PublicKeyCredentialCreationOptions;
 use Webauthn\PublicKeyCredentialLoader;
+use Webauthn\PublicKeyCredentialRpEntity;
 
 /**
  * @RouteScope(scopes={"storefront"})
@@ -102,11 +104,9 @@ class AccountCredentialController extends AbstractController
     {
         $this->denyAccessUnlessLoggedIn();
 
-        $options = $this->creationOptionsFactory->create(
-            $request->getHost(),
-            $context->getCustomer()->getEmail(),
-            $context->getCustomer()->getId()
-        );
+        $userEntity = EntityConverter::toUserEntity($context->getCustomer());
+
+        $options = $this->creationOptionsFactory->create($this->getRpEntity($request), $userEntity);
 
         $this->getSession()->set(self::CREATION_OPTIONS_SESSION_KEY, json_encode($options));
 
@@ -137,8 +137,13 @@ class AccountCredentialController extends AbstractController
         $creationOptions = PublicKeyCredentialCreationOptions::createFromString($creationOptionsJson);
         $psrRequest = $this->httpMessageFactory->createRequest($request);
         $credentialSource = $this->authenticatorAttestationResponseValidator->check($response, $creationOptions, $psrRequest);
-        $namedCredential = new NamedCredential($credentialSource, $requestParams['name']);
-        $this->credentialRepository->saveCredentialSource($namedCredential);
+
+        $entity = new PublicKeyCredentialEntity($credentialSource);
+        if (isset($requestParams['name']) && is_string($requestParams['name'])) {
+            $entity->setName($requestParams['name']);
+        }
+
+        $this->credentialRepository->saveCredentialSource($entity);
         $this->getSession()->remove(self::CREATION_OPTIONS_SESSION_KEY);
 
         return new JsonResponse();
@@ -153,11 +158,9 @@ class AccountCredentialController extends AbstractController
 
         $credentialId = Base64Url::decode($credentialId);
         $credential = $this->credentialRepository->findOneByCredentialId($credentialId);
-        if ($credential === null || bin2hex($credential->getUserHandle()) !== $salesChannelContext->getCustomer()->getId()) {
-            return $this->redirectToRoute('frontend.account.credential.page');
+        if ($credential !== null && bin2hex($credential->getUserHandle()) === $salesChannelContext->getCustomer()->getId()) {
+            $this->credentialRepository->deleteById($credentialId);
         }
-
-        $this->credentialRepository->deleteById($credentialId);
 
         return $this->redirectToRoute('frontend.account.credential.page');
     }
@@ -169,8 +172,25 @@ class AccountCredentialController extends AbstractController
     {
         $this->denyAccessUnlessLoggedIn();
 
-        $this->credentialRepository->deleteByCustomerId($salesChannelContext->getCustomer()->getId());
+        $this->credentialRepository->deleteAllForUserEntity(
+            EntityConverter::toUserEntity($salesChannelContext->getCustomer())
+        );
 
         return $this->redirectToRoute('frontend.account.credential.page');
+    }
+
+    /**
+     * @param Request $request
+     * @return PublicKeyCredentialRpEntity
+     */
+    private function getRpEntity(Request $request): PublicKeyCredentialRpEntity
+    {
+        $host = $request->getHost();
+
+        return new PublicKeyCredentialRpEntity(
+            $host,
+            $host,
+            null
+        );
     }
 }

@@ -3,6 +3,7 @@
 namespace Reply\WebAuthn\Bridge;
 
 use Cose\Algorithm\Manager;
+use Reply\WebAuthn\Configuration\Configuration;
 use Reply\WebAuthn\Configuration\ConfigurationReader;
 use Webauthn\AuthenticatorSelectionCriteria;
 use Webauthn\PublicKeyCredentialCreationOptions;
@@ -34,52 +35,53 @@ class PublicKeyCredentialCreationOptionsFactory
     }
 
     /**
-     * @param string $hostName
-     * @param string $userName
-     * @param string $userId
+     * @param PublicKeyCredentialRpEntity $rpEntity
+     * @param PublicKeyCredentialUserEntity $userEntity
      * @return PublicKeyCredentialCreationOptions
      */
-    public function create(string $hostName, string $userName, string $userId): PublicKeyCredentialCreationOptions
+    public function create(PublicKeyCredentialRpEntity $rpEntity, PublicKeyCredentialUserEntity $userEntity): PublicKeyCredentialCreationOptions
     {
-        $rpEntity = new PublicKeyCredentialRpEntity(
-            $hostName,
-            $hostName,
-            null
-        );
-
-        $userEntity = new PublicKeyCredentialUserEntity(
-            $userName,
-            $userId,
-            $userName,
-            null
-        );
-
-        $publicKeyCredentialParametersList = [];
-        foreach ($this->algorithmManager->all() as $algorithm) {
-            $publicKeyCredentialParametersList[] = new PublicKeyCredentialParameters(
-                PublicKeyCredentialDescriptor::CREDENTIAL_TYPE_PUBLIC_KEY,
-                $algorithm::identifier()
-            );
-        }
-
         $config = $this->configurationReader->read();
-
-        $authenticatorSelectionCriteria = new AuthenticatorSelectionCriteria(
-            null,
-            $config->isResidentKeyRequired(),
-            $config->getUserVerification()
-        );
 
         return new PublicKeyCredentialCreationOptions(
             $rpEntity,
             $userEntity,
             Challenge::generate(),
-            $publicKeyCredentialParametersList,
+            $this->buildCredentialParametersList(),
             $config->getTimeout() * 1000,
             [],
-            $authenticatorSelectionCriteria,
+            $this->getAuthenticatorSelectionCriteria($config),
             $config->getAttestation(),
             null
+        );
+    }
+
+    /**
+     * @return array|PublicKeyCredentialParameters[]
+     */
+    private function buildCredentialParametersList(): array
+    {
+        $list = [];
+        foreach ($this->algorithmManager->all() as $algorithm) {
+            $list[] = new PublicKeyCredentialParameters(
+                PublicKeyCredentialDescriptor::CREDENTIAL_TYPE_PUBLIC_KEY,
+                $algorithm::identifier()
+            );
+        }
+
+        return $list;
+    }
+
+    /**
+     * @param Configuration $config
+     * @return AuthenticatorSelectionCriteria
+     */
+    private function getAuthenticatorSelectionCriteria(Configuration $config): AuthenticatorSelectionCriteria
+    {
+        return new AuthenticatorSelectionCriteria(
+            null,
+            $config->isResidentKeyRequired(),
+            $config->getUserVerification()
         );
     }
 }

@@ -3,6 +3,7 @@
 namespace Reply\WebAuthn\Controller;
 
 use Reply\WebAuthn\Bridge\CustomerCredentialRepository;
+use Reply\WebAuthn\Bridge\EntityConverter;
 use Reply\WebAuthn\Bridge\PublicKeyCredentialDescriptorFakeFactory;
 use Reply\WebAuthn\Bridge\PublicKeyCredentialRequestOptionsFactory;
 use Shopware\Core\Checkout\Customer\Exception\CustomerNotFoundException;
@@ -105,8 +106,9 @@ class LoginController extends AbstractController
 
         try {
             $customer = $this->accountService->getCustomerByEmail($username, $context);
+            $userEntity = EntityConverter::toUserEntity($customer);
             $descriptors = [];
-            foreach ($this->credentialRepository->findAllByCustomerId($customer->getId()) as $credentialSource) {
+            foreach ($this->credentialRepository->findAllForUserEntity($userEntity) as $credentialSource) {
                 $descriptors[] = $credentialSource->getPublicKeyCredentialDescriptor();
             }
         } catch (CustomerNotFoundException $e) {
@@ -154,7 +156,7 @@ class LoginController extends AbstractController
             $credential->getResponse(),
             $requestOptions,
             $psrRequest,
-            $customer->getId()
+            EntityConverter::toUserEntity($customer)->getId()
         );
 
         $this->accountService->login($customer->getEmail(), $context);

@@ -2,11 +2,11 @@
 
 namespace Reply\WebAuthn\Bridge;
 
+use DateTimeImmutable;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Driver\ResultStatement;
 use Doctrine\DBAL\FetchMode;
 use Ramsey\Uuid\Uuid;
-use Shopware\Core\Checkout\Customer\CustomerEntity;
 use Webauthn\PublicKeyCredentialSource;
 use Webauthn\PublicKeyCredentialSourceRepository;
 use Webauthn\PublicKeyCredentialUserEntity;
@@ -31,7 +31,7 @@ class DoctrineCustomerCredentialRepository implements PublicKeyCredentialSourceR
 
     /**
      * @param string $publicKeyCredentialId
-     * @return PublicKeyCredentialSource|null
+     * @return PublicKeyCredentialEntity|null
      */
     public function findOneByCredentialId(string $publicKeyCredentialId): ?PublicKeyCredentialSource
     {
@@ -53,11 +53,24 @@ class DoctrineCustomerCredentialRepository implements PublicKeyCredentialSourceR
     }
 
     /**
-     * @return PublicKeyCredentialSource[]
+     * @param PublicKeyCredentialUserEntity $publicKeyCredentialUserEntity
+     * @return PublicKeyCredentialEntity[]
      */
     public function findAllForUserEntity(PublicKeyCredentialUserEntity $publicKeyCredentialUserEntity): array
     {
-        return $this->findAllByCustomerId($publicKeyCredentialUserEntity->getId());
+        $query = $this->connection->createQueryBuilder();
+        $query->select('*')
+            ->from(self::TABLE_NAME)
+            ->where('user_handle = :id')
+            ->setParameter('id', $publicKeyCredentialUserEntity->getId());
+
+        /** @var ResultStatement $result */
+        $result = $query->execute();
+        $values = $result->fetchAll(FetchMode::ASSOCIATIVE);
+
+        return array_map(function (array $row) {
+            return $this->hydrate($row);
+        }, $values);
     }
 
     /**
@@ -74,36 +87,6 @@ class DoctrineCustomerCredentialRepository implements PublicKeyCredentialSourceR
     }
 
     /**
-     * @param string $customerId
-     * @return PublicKeyCredentialSource[]
-     */
-    public function findAllByCustomerId(string $customerId): array
-    {
-        $query = $this->connection->createQueryBuilder();
-        $query->select('*')
-            ->from(self::TABLE_NAME)
-            ->where('customer_id = :id')
-            ->setParameter('id', $customerId);
-
-        /** @var ResultStatement $result */
-        $result = $query->execute();
-        $values = $result->fetchAll(FetchMode::ASSOCIATIVE);
-
-        return array_map(function (array $row) {
-            return $this->hydrate($row);
-        }, $values);
-    }
-
-    /**
-     * @param CustomerEntity $customerEntity
-     * @return PublicKeyCredentialSource[]
-     */
-    public function findAllByCustomer(CustomerEntity $customerEntity): array
-    {
-        return $this->findAllByCustomerId(hex2bin($customerEntity->getId()));
-    }
-
-    /**
      * @param string $credentialId
      */
     public function deleteById(string $credentialId): void
@@ -114,20 +97,20 @@ class DoctrineCustomerCredentialRepository implements PublicKeyCredentialSourceR
     }
 
     /**
-     * @param string $customerId
+     * @param PublicKeyCredentialUserEntity $userEntity
      */
-    public function deleteByCustomerId(string $customerId): void
+    public function deleteAllForUserEntity(PublicKeyCredentialUserEntity $userEntity): void
     {
         $this->connection->delete(self::TABLE_NAME, [
-            'customer_id' => $customerId
+            'user_handle' => $userEntity->getId()
         ]);
     }
 
     /**
      * @param array $values
-     * @return NamedCredential
+     * @return PublicKeyCredentialEntity
      */
-    private function hydrate(array $values): NamedCredential
+    private function hydrate(array $values): PublicKeyCredentialEntity
     {
         $source = new PublicKeyCredentialSource(
             $values['id'],
@@ -137,11 +120,18 @@ class DoctrineCustomerCredentialRepository implements PublicKeyCredentialSourceR
             TrustPathLoader::loadTrustPath(json_decode($values['trust_path'], true)),
             Uuid::fromString($values['aaguid']),
             $values['public_key'],
-            $values['customer_id'],
+            $values['user_handle'],
             (int)$values['counter']
         );
 
-        return new NamedCredential($source, $values['name']);
+        $entity = new PublicKeyCredentialEntity($source);
+        $entity->setName($values['name']);
+        $entity->setCreatedAt(new DateTimeImmutable($values['created_at']));
+        if ($values['updated_at'] !== null) {
+            $entity->setUpdatedAt(new DateTimeImmutable($values['updated_at']));
+        }
+
+        return $entity;
     }
 
     /**
@@ -166,11 +156,11 @@ class DoctrineCustomerCredentialRepository implements PublicKeyCredentialSourceR
             'trust_path' => json_encode($publicKeyCredentialSource->getTrustPath()),
             'aaguid' => $publicKeyCredentialSource->getAaguid()->toString(),
             'public_key' => $publicKeyCredentialSource->getCredentialPublicKey(),
-            'customer_id' => $publicKeyCredentialSource->getUserHandle(),
+            'user_handle' => $publicKeyCredentialSource->getUserHandle(),
             'counter' => $publicKeyCredentialSource->getCounter(),
             'created_at' => date($this->connection->getDatabasePlatform()->getDateTimeFormatString())
         ];
-        if ($publicKeyCredentialSource instanceof NamedCredential) {
+        if ($publicKeyCredentialSource instanceof PublicKeyCredentialEntity) {
             $data['name'] = $publicKeyCredentialSource->getName();
         }
         $this->connection->insert(self::TABLE_NAME, $data);

@@ -2,22 +2,15 @@
 
 namespace Reply\WebAuthn\Bridge;
 
-use Shopware\Core\Checkout\Customer\CustomerEntity;
-use Webauthn\PublicKeyCredentialSource;
 use Webauthn\PublicKeyCredentialSourceRepository;
+use Webauthn\PublicKeyCredentialUserEntity;
 
 interface CustomerCredentialRepository extends PublicKeyCredentialSourceRepository
 {
     /**
-     * @return PublicKeyCredentialSource[]
+     * @return PublicKeyCredentialEntity[]
      */
-    public function findAllByCustomerId(string $customerId): array;
-
-    /**
-     * @param CustomerEntity $customerEntity
-     * @return PublicKeyCredentialSource[]
-     */
-    public function findAllByCustomer(CustomerEntity $customerEntity): array;
+    public function findAllForUserEntity(PublicKeyCredentialUserEntity $publicKeyCredentialUserEntity): array;
 
     /**
      * @param string $credentialId
@@ -25,7 +18,7 @@ interface CustomerCredentialRepository extends PublicKeyCredentialSourceReposito
     public function deleteById(string $credentialId): void;
 
     /**
-     * @param string $customerId
+     * @param PublicKeyCredentialUserEntity $userEntity
      */
-    public function deleteByCustomerId(string $customerId): void;
+    public function deleteAllForUserEntity(PublicKeyCredentialUserEntity $userEntity): void;
 }
