@@ -23,5 +23,8 @@
       "de-DE": "WebAuthn Authentifizierung",
       "en-GB": "WebAuthn authentification"
     }
+  },
+  "archive": {
+    "exclude": ["build*", "docker", ".gitlab-ci.yml", "*.phar"]
   }
 }
