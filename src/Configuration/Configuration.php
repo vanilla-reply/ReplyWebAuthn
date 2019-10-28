@@ -2,15 +2,8 @@
 
 namespace Reply\WebAuthn\Configuration;
 
-use Cose\Algorithm\Signature\ECDSA\ES256;
-use Cose\Algorithm\Signature\ECDSA\ES384;
-use Cose\Algorithm\Signature\ECDSA\ES512;
-use Cose\Algorithm\Signature\RSA\RS256;
-use Cose\Algorithm\Signature\RSA\RS384;
-use Cose\Algorithm\Signature\RSA\RS512;
 use Iterator;
-use Webauthn\AuthenticatorSelectionCriteria;
-use Webauthn\PublicKeyCredentialCreationOptions;
+use Reply\WebAuthn\ReplyWebAuthn;
 
 class Configuration implements \IteratorAggregate
 {
@@ -24,31 +17,7 @@ class Configuration implements \IteratorAggregate
      */
     public function __construct(array $values)
     {
-        $this->values = array_merge(self::getDefaults(), $values);
-    }
-
-    /**
-     * @return array
-     */
-    private static function getDefaults(): array
-    {
-        return [
-            'timeout' => 20,
-            'attestation' => PublicKeyCredentialCreationOptions::ATTESTATION_CONVEYANCE_PREFERENCE_DIRECT,
-            'userVerification' => AuthenticatorSelectionCriteria::USER_VERIFICATION_REQUIREMENT_PREFERRED,
-            'requireResidentKey' => false,
-            'attestationStatementFormats' => [
-                'android-key', 'fido-u2f', 'none', 'tpm'
-            ],
-            'algorithms' => [
-                ES256::class,
-                ES384::class,
-                ES512::class,
-                RS256::class,
-                RS384::class,
-                RS512::class
-            ]
-        ];
+        $this->values = array_merge(ReplyWebAuthn::getDefaultConfig(), $values);
     }
 
     /**

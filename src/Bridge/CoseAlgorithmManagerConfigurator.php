@@ -28,7 +28,9 @@ class CoseAlgorithmManagerConfigurator
         $this->configurationReader = $configurationReader;
         $this->supportedTypes = [];
         foreach ($supportedTypes as $supportedType) {
-            $this->supportedTypes[get_class($supportedType)] = $supportedType;
+            $className = get_class($supportedType);
+            $configName = strtolower(substr($className, strrpos($className, '\\') + 1));
+            $this->supportedTypes[$configName] = $supportedType;
         }
     }
 
@@ -38,22 +40,22 @@ class CoseAlgorithmManagerConfigurator
     public function __invoke(Manager $manager): void
     {
         $config = $this->configurationReader->read();
-        foreach ($config->getAlgorithms() as $className) {
-            $manager->add($this->getByClassName($className));
+        foreach ($config->getAlgorithms() as $configName) {
+            $manager->add($this->getByConfigName($configName));
         }
     }
 
     /**
-     * @param string $className
+     * @param string $configName
      * @return Algorithm
      * @throws UnsupportedAlgorithmException
      */
-    private function getByClassName(string $className): Algorithm
+    private function getByConfigName(string $configName): Algorithm
     {
-        if (!isset($this->supportedTypes[$className])) {
-            throw new UnsupportedAlgorithmException($className);
+        if (!isset($this->supportedTypes[$configName])) {
+            throw new UnsupportedAlgorithmException($configName);
         }
 
-        return $this->supportedTypes[$className];
+        return $this->supportedTypes[$configName];
     }
 }

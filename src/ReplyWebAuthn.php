@@ -2,9 +2,11 @@
 
 namespace Reply\WebAuthn;
 
+if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
+    require_once __DIR__ . '/../vendor/autoload.php';
+}
+
 use Doctrine\DBAL\Connection;
-use Reply\WebAuthn\Bridge\DoctrineCustomerCredentialRepository;
-use Reply\WebAuthn\Configuration\Configuration;
 use Shopware\Core\Framework\Plugin;
 use Shopware\Core\Framework\Plugin\Context\InstallContext;
 use Shopware\Core\Framework\Plugin\Context\UninstallContext;
@@ -44,10 +46,9 @@ class ReplyWebAuthn extends Plugin
      */
     private function writeDefaultConfig(): void
     {
-        $config = new Configuration([]);
         $systemConfigService = $this->container->get(SystemConfigService::class);
 
-        foreach ($config->getIterator() as $key => $value) {
+        foreach (self::getDefaultConfig() as $key => $value) {
             $prefixedKey = self::CONFIG_PREFIX . '.' .  $key;
             if ($systemConfigService->get($prefixedKey) === null) {
                 $systemConfigService->set($prefixedKey, $value);
@@ -74,18 +75,30 @@ class ReplyWebAuthn extends Plugin
      */
     private function dropTables(Connection $connection): void
     {
-        foreach ($this->getTables() as $table) {
-            $connection->executeQuery("DROP TABLE IF EXISTS `$table`");
-        }
+        $connection->executeQuery("DROP TABLE IF EXISTS `customer_credential`");
     }
 
     /**
      * @return array
      */
-    private function getTables(): array
+    public static function getDefaultConfig(): array
     {
         return [
-            DoctrineCustomerCredentialRepository::TABLE_NAME
+            'timeout' => 20,
+            'attestation' => 'direct',
+            'userVerification' => 'preferred',
+            'requireResidentKey' => false,
+            'attestationStatementFormats' => [
+                'android-key', 'fido-u2f', 'none', 'tpm'
+            ],
+            'algorithms' => [
+                'es256',
+                'es384',
+                'es512',
+                'rs256',
+                'rs384',
+                'rs512'
+            ]
         ];
     }
 }

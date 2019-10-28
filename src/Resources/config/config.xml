@@ -79,27 +79,27 @@
             <label>Algorithms</label>
             <options>
                 <option>
-                    <id>Cose\Algorithm\Signature\ECDSA\ES256</id>
+                    <id>es256</id>
                     <name>ES256</name>
                 </option>
                 <option>
-                    <id>Cose\Algorithm\Signature\ECDSA\ES384</id>
+                    <id>es384</id>
                     <name>ES384</name>
                 </option>
                 <option>
-                    <id>Cose\Algorithm\Signature\ECDSA\ES512</id>
+                    <id>es512</id>
                     <name>ES512</name>
                 </option>
                 <option>
-                    <id>Cose\Algorithm\Signature\RSA\RS256</id>
+                    <id>rs256</id>
                     <name>RS256</name>
                 </option>
                 <option>
-                    <id>Cose\Algorithm\Signature\RSA\RS384</id>
+                    <id>rs384</id>
                     <name>RS384</name>
                 </option>
                 <option>
-                    <id>Cose\Algorithm\Signature\RSA\RS512</id>
+                    <id>rs512</id>
                     <name>RS512</name>
                 </option>
             </options>
