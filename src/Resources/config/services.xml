@@ -26,9 +26,6 @@
             <argument id="Webauthn\PublicKeyCredentialLoader" type="service"/>
             <argument id="Webauthn\AuthenticatorAttestationResponseValidator" type="service"/>
             <argument id="Symfony\Bridge\PsrHttpMessage\Factory\PsrHttpFactory" type="service"/>
-            <call method="setContainer">
-                <argument id="service_container" type="service"/>
-            </call>
         </service>
 
         <service id="Reply\WebAuthn\Controller\LoginController" public="true">
@@ -39,9 +36,6 @@
             <argument id="Webauthn\PublicKeyCredentialLoader" type="service"/>
             <argument id="Webauthn\AuthenticatorAssertionResponseValidator" type="service"/>
             <argument id="Symfony\Bridge\PsrHttpMessage\Factory\PsrHttpFactory" type="service"/>
-            <call method="setContainer">
-                <argument id="service_container" type="service"/>
-            </call>
         </service>
 
         <!-- Configuration services -->

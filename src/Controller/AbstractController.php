@@ -4,18 +4,9 @@ namespace Reply\WebAuthn\Controller;
 
 use Shopware\Storefront\Controller\StorefrontController;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 abstract class AbstractController extends StorefrontController
 {
-    /**
-     * @return SessionInterface
-     */
-    protected function getSession(): SessionInterface
-    {
-        return $this->container->get('session');
-    }
-
     /**
      * @param string $message
      * @param int $status

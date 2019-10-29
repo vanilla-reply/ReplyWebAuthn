@@ -108,7 +108,7 @@ class AccountCredentialController extends AbstractController
 
         $options = $this->creationOptionsFactory->create($this->getRpEntity($request), $userEntity);
 
-        $this->getSession()->set(self::CREATION_OPTIONS_SESSION_KEY, json_encode($options));
+        $request->getSession()->set(self::CREATION_OPTIONS_SESSION_KEY, json_encode($options));
 
         return new JsonResponse($options);
     }
@@ -128,7 +128,7 @@ class AccountCredentialController extends AbstractController
             return $this->createErrorResponse('Authenticator response does not contain attestation.');
         }
 
-        $creationOptionsJson = $this->getSession()->get(self::CREATION_OPTIONS_SESSION_KEY);
+        $creationOptionsJson = $request->getSession()->get(self::CREATION_OPTIONS_SESSION_KEY);
         if (!is_string($creationOptionsJson)) {
             return $this->createErrorResponse('Saving credential has not been initialized properly.');
         }
@@ -144,7 +144,7 @@ class AccountCredentialController extends AbstractController
         }
 
         $this->credentialRepository->saveCredentialSource($entity);
-        $this->getSession()->remove(self::CREATION_OPTIONS_SESSION_KEY);
+        $request->getSession()->remove(self::CREATION_OPTIONS_SESSION_KEY);
 
         return new JsonResponse();
     }

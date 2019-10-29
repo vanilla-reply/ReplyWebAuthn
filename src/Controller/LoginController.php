@@ -118,8 +118,8 @@ class LoginController extends AbstractController
 
         $requestOptions = $this->requestOptionsFactory->create($request->getHost(), $descriptors);
 
-        $this->getSession()->set(self::USERNAME_SESSION_KEY, $username);
-        $this->getSession()->set(self::REQUEST_OPTIONS_SESSION_KEY, json_encode($requestOptions));
+        $request->getSession()->set(self::USERNAME_SESSION_KEY, $username);
+        $request->getSession()->set(self::REQUEST_OPTIONS_SESSION_KEY, json_encode($requestOptions));
 
         return new JsonResponse($requestOptions);
     }
@@ -139,12 +139,12 @@ class LoginController extends AbstractController
             return $this->createErrorResponse('Authenticator response does not contain assertion.');
         }
 
-        $requestOptionsJson = $this->getSession()->get(self::REQUEST_OPTIONS_SESSION_KEY);
+        $requestOptionsJson = $request->getSession()->get(self::REQUEST_OPTIONS_SESSION_KEY);
         if (!is_string($requestOptionsJson)) {
             return $this->createErrorResponse('Login has not been initialized properly.');
         }
 
-        $username = $this->getSession()->get(self::USERNAME_SESSION_KEY);
+        $username = $request->getSession()->get(self::USERNAME_SESSION_KEY);
         $customer = $this->accountService->getCustomerByEmail($username, $context);
 
         /** @var PublicKeyCredentialRequestOptions $requestOptions */
@@ -161,8 +161,8 @@ class LoginController extends AbstractController
 
         $this->accountService->login($customer->getEmail(), $context);
 
-        $this->getSession()->remove(self::USERNAME_SESSION_KEY);
-        $this->getSession()->remove(self::REQUEST_OPTIONS_SESSION_KEY);
+        $request->getSession()->remove(self::USERNAME_SESSION_KEY);
+        $request->getSession()->remove(self::REQUEST_OPTIONS_SESSION_KEY);
 
         return new JsonResponse();
     }
