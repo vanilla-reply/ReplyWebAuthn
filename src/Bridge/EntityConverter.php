@@ -14,6 +14,7 @@ class EntityConverter
     public static function toUserEntity(CustomerEntity $customerEntity): PublicKeyCredentialUserEntity
     {
         $name = $customerEntity->getEmail();
+
         return new PublicKeyCredentialUserEntity(
             $name,
             hex2bin($customerEntity->getId()),

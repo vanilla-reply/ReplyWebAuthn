@@ -9,6 +9,7 @@ use Reply\WebAuthn\Bridge\PublicKeyCredentialRequestOptionsFactory;
 use Shopware\Core\Checkout\Customer\Exception\CustomerNotFoundException;
 use Shopware\Core\Checkout\Customer\SalesChannel\AccountService;
 use Shopware\Core\Framework\Routing\Annotation\RouteScope;
+use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Symfony\Bridge\PsrHttpMessage\HttpMessageFactoryInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -140,26 +141,36 @@ class LoginController extends AbstractController
         }
 
         $requestOptionsJson = $request->getSession()->get(self::REQUEST_OPTIONS_SESSION_KEY);
-        if (!is_string($requestOptionsJson)) {
+        $username = $request->getSession()->get(self::USERNAME_SESSION_KEY);
+        if (!is_string($requestOptionsJson) || !is_string($username)) {
             return $this->createErrorResponse('Login has not been initialized properly.');
         }
 
-        $username = $request->getSession()->get(self::USERNAME_SESSION_KEY);
-        $customer = $this->accountService->getCustomerByEmail($username, $context);
-
         /** @var PublicKeyCredentialRequestOptions $requestOptions */
         $requestOptions = PublicKeyCredentialRequestOptions::createFromString($requestOptionsJson);
-        $psrRequest = $this->httpMessageFactory->createRequest($request);
 
-        $this->authenticatorAssertionResponseValidator->check(
-            $credential->getRawId(),
-            $credential->getResponse(),
-            $requestOptions,
-            $psrRequest,
-            EntityConverter::toUserEntity($customer)->getId()
-        );
+        try {
+            $customer = $this->accountService->getCustomerByEmail($username, $context);
+            $userEntity = EntityConverter::toUserEntity($customer);
+            $userHandle = $userEntity->getId();
+        } catch (CustomerNotFoundException $e) {
+            // Proceed with random userHandle to prevent user discovery attacks
+            $userHandle = Uuid::randomBytes();
+        }
 
-        $this->accountService->login($customer->getEmail(), $context);
+        try {
+            $this->authenticatorAssertionResponseValidator->check(
+                $credential->getRawId(),
+                $credential->getResponse(),
+                $requestOptions,
+                $this->httpMessageFactory->createRequest($request),
+                $userHandle
+            );
+        } catch (\Exception $e) {
+            return $this->createErrorResponse('Authentication failed');
+        }
+
+        $this->accountService->login($username, $context);
 
         $request->getSession()->remove(self::USERNAME_SESSION_KEY);
         $request->getSession()->remove(self::REQUEST_OPTIONS_SESSION_KEY);
