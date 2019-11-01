@@ -7,6 +7,7 @@ if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
 }
 
 use Doctrine\DBAL\Connection;
+use RuntimeException;
 use Shopware\Core\Framework\Plugin;
 use Shopware\Core\Framework\Plugin\Context\InstallContext;
 use Shopware\Core\Framework\Plugin\Context\UninstallContext;
@@ -21,6 +22,10 @@ class ReplyWebAuthn extends Plugin
      */
     public function install(InstallContext $installContext): void
     {
+        if (!extension_loaded('gmp')) {
+            throw new RuntimeException('Missing required PHP extension gmp');
+        }
+
         parent::install($installContext);
         $this->writeDefaultConfig();
     }
