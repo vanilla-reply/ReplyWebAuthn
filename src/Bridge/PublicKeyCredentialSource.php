@@ -3,9 +3,9 @@
 namespace Reply\WebAuthn\Bridge;
 
 use DateTimeImmutable;
-use Webauthn\PublicKeyCredentialSource;
+use Webauthn\PublicKeyCredentialSource as BaseSource;
 
-class PublicKeyCredentialEntity extends PublicKeyCredentialSource
+class PublicKeyCredentialSource extends BaseSource
 {
     /**
      * @var string
@@ -22,23 +22,19 @@ class PublicKeyCredentialEntity extends PublicKeyCredentialSource
      */
     protected $updatedAt;
 
-    /**
-     * @param PublicKeyCredentialSource $publicKeyCredentialSource
-     */
-    public function __construct(PublicKeyCredentialSource $publicKeyCredentialSource)
+    public static function createFromBase(BaseSource $baseSource): self
     {
-        parent::__construct(
-            $publicKeyCredentialSource->getPublicKeyCredentialId(),
-            $publicKeyCredentialSource->getType(),
-            $publicKeyCredentialSource->getTransports(),
-            $publicKeyCredentialSource->getAttestationType(),
-            $publicKeyCredentialSource->getTrustPath(),
-            $publicKeyCredentialSource->getAaguid(),
-            $publicKeyCredentialSource->getCredentialPublicKey(),
-            $publicKeyCredentialSource->getUserHandle(),
-            $publicKeyCredentialSource->getCounter()
+        return new self(
+            $baseSource->getPublicKeyCredentialId(),
+            $baseSource->getType(),
+            $baseSource->getTransports(),
+            $baseSource->getAttestationType(),
+            $baseSource->getTrustPath(),
+            $baseSource->getAaguid(),
+            $baseSource->getCredentialPublicKey(),
+            $baseSource->getUserHandle(),
+            $baseSource->getCounter()
         );
-        $this->name = '';
     }
 
     /**

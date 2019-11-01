@@ -2,18 +2,18 @@
 
 namespace Reply\WebAuthn\Page\Account\Credential;
 
-use Reply\WebAuthn\Bridge\PublicKeyCredentialEntity;
+use Reply\WebAuthn\Bridge\PublicKeyCredentialSource;
 use Shopware\Storefront\Page\Page;
 
 class AccountCredentialPage extends Page
 {
     /**
-     * @var PublicKeyCredentialEntity[]
+     * @var PublicKeyCredentialSource[]
      */
     protected $credentials;
 
     /**
-     * @return PublicKeyCredentialEntity[]
+     * @return PublicKeyCredentialSource[]
      */
     public function getCredentials(): array
     {
@@ -21,7 +21,7 @@ class AccountCredentialPage extends Page
     }
 
     /**
-     * @param PublicKeyCredentialEntity[] $credentials
+     * @param PublicKeyCredentialSource[] $credentials
      */
     public function setCredentials(array $credentials): void
     {

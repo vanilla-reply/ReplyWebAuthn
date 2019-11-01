@@ -8,7 +8,7 @@ use Webauthn\PublicKeyCredentialUserEntity;
 interface CustomerCredentialRepository extends PublicKeyCredentialSourceRepository
 {
     /**
-     * @return PublicKeyCredentialEntity[]
+     * @return PublicKeyCredentialSource[]
      */
     public function findAllForUserEntity(PublicKeyCredentialUserEntity $publicKeyCredentialUserEntity): array;
 

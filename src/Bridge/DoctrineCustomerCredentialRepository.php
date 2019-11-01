@@ -6,8 +6,9 @@ use DateTimeImmutable;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Driver\ResultStatement;
 use Doctrine\DBAL\FetchMode;
+use InvalidArgumentException;
 use Ramsey\Uuid\Uuid;
-use Webauthn\PublicKeyCredentialSource;
+use Webauthn\PublicKeyCredentialSource as BaseSource;
 use Webauthn\PublicKeyCredentialSourceRepository;
 use Webauthn\PublicKeyCredentialUserEntity;
 use Webauthn\TrustPath\TrustPathLoader;
@@ -31,9 +32,9 @@ class DoctrineCustomerCredentialRepository implements PublicKeyCredentialSourceR
 
     /**
      * @param string $publicKeyCredentialId
-     * @return PublicKeyCredentialEntity|null
+     * @return PublicKeyCredentialSource|null
      */
-    public function findOneByCredentialId(string $publicKeyCredentialId): ?PublicKeyCredentialSource
+    public function findOneByCredentialId(string $publicKeyCredentialId): ?BaseSource
     {
         $query = $this->connection->createQueryBuilder();
         $query->select('*')
@@ -54,7 +55,7 @@ class DoctrineCustomerCredentialRepository implements PublicKeyCredentialSourceR
 
     /**
      * @param PublicKeyCredentialUserEntity $publicKeyCredentialUserEntity
-     * @return PublicKeyCredentialEntity[]
+     * @return PublicKeyCredentialSource[]
      */
     public function findAllForUserEntity(PublicKeyCredentialUserEntity $publicKeyCredentialUserEntity): array
     {
@@ -74,10 +75,17 @@ class DoctrineCustomerCredentialRepository implements PublicKeyCredentialSourceR
     }
 
     /**
-     * @param PublicKeyCredentialSource $publicKeyCredentialSource
+     * @param BaseSource $publicKeyCredentialSource
      */
-    public function saveCredentialSource(PublicKeyCredentialSource $publicKeyCredentialSource): void
+    public function saveCredentialSource(BaseSource $publicKeyCredentialSource): void
     {
+        if (!$publicKeyCredentialSource instanceof PublicKeyCredentialSource) {
+            throw new InvalidArgumentException(sprintf(
+                'Argument has to be an instance of %s',
+                PublicKeyCredentialSource::class
+            ));
+        }
+
         if ($this->exists($publicKeyCredentialSource->getPublicKeyCredentialId())) {
             $this->update($publicKeyCredentialSource);
             return;
@@ -108,11 +116,11 @@ class DoctrineCustomerCredentialRepository implements PublicKeyCredentialSourceR
 
     /**
      * @param array $values
-     * @return PublicKeyCredentialEntity
+     * @return PublicKeyCredentialSource
      */
-    private function hydrate(array $values): PublicKeyCredentialEntity
+    private function hydrate(array $values): PublicKeyCredentialSource
     {
-        $source = new PublicKeyCredentialSource(
+        $entity = new PublicKeyCredentialSource(
             $values['id'],
             $values['type'],
             json_decode($values['transports'], true),
@@ -123,8 +131,6 @@ class DoctrineCustomerCredentialRepository implements PublicKeyCredentialSourceR
             $values['user_handle'],
             (int)$values['counter']
         );
-
-        $entity = new PublicKeyCredentialEntity($source);
         $entity->setName($values['name']);
         $entity->setCreatedAt(new DateTimeImmutable($values['created_at']));
         if ($values['updated_at'] !== null) {
@@ -158,11 +164,9 @@ class DoctrineCustomerCredentialRepository implements PublicKeyCredentialSourceR
             'public_key' => $publicKeyCredentialSource->getCredentialPublicKey(),
             'user_handle' => $publicKeyCredentialSource->getUserHandle(),
             'counter' => $publicKeyCredentialSource->getCounter(),
-            'created_at' => date($this->connection->getDatabasePlatform()->getDateTimeFormatString())
+            'created_at' => date($this->connection->getDatabasePlatform()->getDateTimeFormatString()),
+            'name' => $publicKeyCredentialSource->getName()
         ];
-        if ($publicKeyCredentialSource instanceof PublicKeyCredentialEntity) {
-            $data['name'] = $publicKeyCredentialSource->getName();
-        }
         $this->connection->insert(self::TABLE_NAME, $data);
     }
 

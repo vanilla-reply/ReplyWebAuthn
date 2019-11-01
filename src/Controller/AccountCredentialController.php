@@ -5,7 +5,7 @@ namespace Reply\WebAuthn\Controller;
 use Base64Url\Base64Url;
 use Reply\WebAuthn\Bridge\CustomerCredentialRepository;
 use Reply\WebAuthn\Bridge\EntityConverter;
-use Reply\WebAuthn\Bridge\PublicKeyCredentialEntity;
+use Reply\WebAuthn\Bridge\PublicKeyCredentialSource;
 use Reply\WebAuthn\Bridge\PublicKeyCredentialCreationOptionsFactory;
 use Reply\WebAuthn\Page\Account\Credential\AccountCredentialPageLoader;
 use Shopware\Core\Checkout\Cart\Exception\CustomerNotLoggedInException;
@@ -119,9 +119,13 @@ class AccountCredentialController extends AbstractController
     public function save(Request $request): JsonResponse
     {
         $this->denyAccessUnlessLoggedIn();
-        $requestParams = $request->request->all();
 
-        $credential = $this->credentialLoader->loadArray($requestParams);
+        $credentialName = $request->request->get('name');
+        if (!is_string($credentialName) || $credentialName === '') {
+            return $this->createErrorResponse('Missing or invalid request parameter "name"');
+        }
+
+        $credential = $this->credentialLoader->loadArray($request->request->all());
         $response = $credential->getResponse();
 
         if (!$response instanceof AuthenticatorAttestationResponse) {
@@ -138,10 +142,8 @@ class AccountCredentialController extends AbstractController
         $psrRequest = $this->httpMessageFactory->createRequest($request);
         $credentialSource = $this->authenticatorAttestationResponseValidator->check($response, $creationOptions, $psrRequest);
 
-        $entity = new PublicKeyCredentialEntity($credentialSource);
-        if (isset($requestParams['name']) && is_string($requestParams['name'])) {
-            $entity->setName($requestParams['name']);
-        }
+        $entity = PublicKeyCredentialSource::createFromBase($credentialSource);
+        $entity->setName($credentialName);
 
         $this->credentialRepository->saveCredentialSource($entity);
         $request->getSession()->remove(self::CREATION_OPTIONS_SESSION_KEY);
