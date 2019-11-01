@@ -2,7 +2,17 @@ image: php:7.2
 
 before_script:
 - curl https://squizlabs.github.io/PHP_CodeSniffer/phpcs.phar --output phpcs.phar
+- curl https://getcomposer.org/composer.phar --output composer.phar
 
 check:psr2:
   script:
   - php phpcs.phar --standard=PSR2 --extensions=php --warning-severity=0 .
+
+build:
+  script:
+    - php composer.phar install --no-dev --no-interaction --no-suggest
+    - php composer.phar archive --dir build/ --format=zip
+  artifacts:
+    paths:
+        - build/
+    expire_in: 1 week
