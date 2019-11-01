@@ -8,9 +8,9 @@ check:psr2:
   script:
   - php phpcs.phar --standard=PSR2 --extensions=php --warning-severity=0 .
 
-build:
+build:zip:
   script:
-    - php composer.phar install --no-dev --no-interaction --no-suggest
+    - php composer.phar install --no-dev --no-interaction --no-suggest --ignore-platform-reqs
     - php composer.phar archive --dir build/ --format=zip
   artifacts:
     paths:
