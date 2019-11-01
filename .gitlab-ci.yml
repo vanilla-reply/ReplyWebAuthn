@@ -1,6 +1,8 @@
 image: php:7.2
 
 before_script:
+- apt update
+- apt install -y git unzip
 - curl https://squizlabs.github.io/PHP_CodeSniffer/phpcs.phar --output phpcs.phar
 - curl https://getcomposer.org/composer.phar --output composer.phar
 
