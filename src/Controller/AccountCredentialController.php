@@ -126,8 +126,11 @@ class AccountCredentialController extends AbstractController
         }
 
         $credential = $this->credentialLoader->loadArray($request->request->all());
-        $response = $credential->getResponse();
+        if (strlen($credential->getRawId()) > 255) {
+            return $this->createErrorResponse('Credential ID exceeds maximum length of 255 bytes');
+        }
 
+        $response = $credential->getResponse();
         if (!$response instanceof AuthenticatorAttestationResponse) {
             return $this->createErrorResponse('Authenticator response does not contain attestation.');
         }
