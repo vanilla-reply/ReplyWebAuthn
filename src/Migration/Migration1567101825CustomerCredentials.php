@@ -22,7 +22,7 @@ class Migration1567101825CustomerCredentials extends MigrationStep
     {
         $connection->executeQuery('
             CREATE TABLE `customer_credential` (
-              `id` binary(64) NOT NULL PRIMARY KEY,
+              `id` varbinary(255) NOT NULL PRIMARY KEY,
               `user_handle` binary(16),
               `name` varchar(255) NOT NULL,
               `type` varchar(255) NOT NULL,
