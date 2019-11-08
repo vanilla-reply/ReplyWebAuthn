@@ -2,10 +2,12 @@
 
 namespace Reply\WebAuthn\Configuration;
 
+use ArrayIterator;
 use Iterator;
+use IteratorAggregate;
 use Reply\WebAuthn\ReplyWebAuthn;
 
-class Configuration implements \IteratorAggregate
+class Configuration implements IteratorAggregate
 {
     /**
      * @var array
@@ -73,6 +75,6 @@ class Configuration implements \IteratorAggregate
      */
     public function getIterator(): Iterator
     {
-        return new \ArrayIterator($this->values);
+        return new ArrayIterator($this->values);
     }
 }
