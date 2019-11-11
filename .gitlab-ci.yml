@@ -3,17 +3,19 @@ image: php:7.2
 before_script:
 - apt update
 - apt install -y git unzip
-- curl https://squizlabs.github.io/PHP_CodeSniffer/phpcs.phar --output phpcs.phar
-- curl https://getcomposer.org/composer.phar --output composer.phar
+- curl https://squizlabs.github.io/PHP_CodeSniffer/phpcs.phar --output /usr/local/bin/phpcs
+- curl https://getcomposer.org/composer.phar --output /usr/local/bin/composer
+- chmod +x /usr/local/bin/phpcs /usr/local/bin/composer
 
 check:psr2:
   script:
-  - php phpcs.phar --standard=PSR2 --extensions=php --warning-severity=0 .
+  - phpcs --standard=PSR2 --extensions=php --warning-severity=0 .
 
 build:zip:
   script:
-    - php composer.phar install --no-dev --no-interaction --no-suggest --ignore-platform-reqs
-    - php composer.phar archive --dir build/ --format=zip
+    - rm .gitignore
+    - composer install --no-dev --no-interaction --no-suggest --ignore-platform-reqs
+    - composer archive --dir build/ --format=zip
   artifacts:
     paths:
         - build/

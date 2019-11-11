@@ -1,4 +1,5 @@
 #!/bin/sh
 
-composer install --no-dev --no-interaction --no-suggest
+rm .gitignore
+composer install --no-dev --no-interaction --no-suggest --ignore-platform-reqs
 composer archive --dir build/ --format=zip
