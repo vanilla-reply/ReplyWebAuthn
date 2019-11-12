@@ -3,7 +3,7 @@
         "account": {
             "credentialLink": "Access keys",
             "credentialTitle": "Access keys",
-            "credentialText": "Manage your access keys for login without password",
+            "credentialText": "Manage your access keys for login without password.",
             "credentialCreate": "Add",
             "credentialDeleteAll": "Delete all",
             "credentialDelete": "Delete",
