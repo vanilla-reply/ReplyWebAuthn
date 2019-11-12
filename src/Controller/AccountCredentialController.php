@@ -171,6 +171,16 @@ class AccountCredentialController extends AbstractController
     }
 
     /**
+     * @Route("/widgets/account/webauthn/credential/creation-modal", name="frontend.account.webauthn.credential.creation-modal", options={"seo"=false}, methods={"GET"}, defaults={"XmlHttpRequest"=true})
+     */
+    public function renderCreationModal(): Response
+    {
+        $this->denyAccessUnlessLoggedIn();
+
+        return $this->renderStorefront('component/account/credential-creation-modal.html.twig');
+    }
+
+    /**
      * @Route("/account/webauthn/credential/delete", name="frontend.account.webauthn.credential.delete.all", options={"seo"="false"}, methods={"POST"})
      */
     public function deleteAll(SalesChannelContext $salesChannelContext): Response

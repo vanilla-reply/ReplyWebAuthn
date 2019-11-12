@@ -2,12 +2,15 @@ import Plugin from 'src/script/plugin-system/plugin.class';
 import HttpClient from 'src/script/service/http-client.service';
 import EncodingHelper from '../helper/encoding.helper';
 import PageLoadingIndicatorUtil from 'src/script/utility/loading-indicator/page-loading-indicator.util';
+import PseudoModalUtil from 'src/script/utility/modal-extension/pseudo-modal.util';
+import DomAccess from 'src/script/helper/dom-access.helper';
 
 export default class CreateCredentialPlugin extends Plugin {
 
     static options = {
         initUrl: window.router['frontend.account.webauthn.credential.creation-options'],
         saveUrl: window.router['frontend.account.webauthn.credential.save'],
+        modalUrl: window.router['frontend.account.webauthn.credential.creation-modal'],
     };
 
     init() {
@@ -40,34 +43,86 @@ export default class CreateCredentialPlugin extends Plugin {
         this._sendRequest(this.options.initUrl, {}, this._createCredential.bind(this));
     }
 
+    /**
+     * Create a new credential on authenticator device
+     *
+     * @param response
+     * @private
+     */
     _createCredential(response) {
         const options = this._convertOptions(response);
 
         console.log('Requesting new credential from authenticator', options);
 
         navigator.credentials.create({publicKey: options})
-            .then(this._promptUserForName.bind(this), error => {
+            .then(this._loadModal.bind(this), error => {
                 PageLoadingIndicatorUtil.remove();
                 console.log(error.toString()); // Example: timeout, interaction refused...
             });
     }
 
-    _promptUserForName(authenticatorData) {
+    /**
+     * Loads the modal content for entering a credential name
+     *
+     * @param authenticatorData
+     * @private
+     */
+    _loadModal(authenticatorData) {
         const credential = this._convertAuthenticatorData(authenticatorData);
-        credential.name = window.prompt('Please enter a name for this credential', '');
-        if (!credential.name) {
+        this._client.get(this.options.modalUrl, content => {
             PageLoadingIndicatorUtil.remove();
-            return;
-        }
-
-        this._saveCredential(credential);
+            const pseudoModal = new PseudoModalUtil(content);
+            pseudoModal.open(this._onModalOpen.bind(this, pseudoModal, credential))
+        });
     }
 
+    /**
+     * Binds various event listeners to modal elements
+     *
+     * @param pseudoModal
+     * @param credential
+     * @private
+     */
+    _onModalOpen(pseudoModal, credential) {
+        const form = DomAccess.querySelector(pseudoModal.getModal(), 'form', false);
+        const input = DomAccess.querySelector(pseudoModal.getModal(), 'input', false);
+
+        input.focus();
+
+        form.addEventListener('submit', (event) => {
+            event.preventDefault();
+            PageLoadingIndicatorUtil.create();
+
+            credential.name = input.value;
+            this._saveCredential(credential);
+            pseudoModal.close();
+        });
+        form.addEventListener('reset', () => {
+            pseudoModal.close();
+        });
+    }
+
+    /**
+     * Saves the credential by sending it to the server
+     *
+     * @param credential
+     * @private
+     */
     _saveCredential(credential) {
         console.log('Sending credential to server', credential);
-        this._sendRequest(this.options.saveUrl, credential, this._onCredentialSaveSuccess.bind(this));
+        this._sendRequest(this.options.saveUrl, credential, () => {
+            window.location.reload();
+        });
     }
 
+    /**
+     * Utility function to send XHR requests
+     *
+     * @param url
+     * @param data
+     * @param success
+     * @private
+     */
     _sendRequest(url, data, success) {
         const request = this._client.post(url, JSON.stringify(data), function() {});
         request.addEventListener('loadend', () => {
@@ -77,10 +132,13 @@ export default class CreateCredentialPlugin extends Plugin {
         });
     }
 
-    _onCredentialSaveSuccess() {
-        window.location.reload();
-    }
-
+    /**
+     * Converts credential creation options from server response to format required by navigator.credentials.create()
+     *
+     * @param options
+     * @returns {*}
+     * @private
+     */
     _convertOptions(options) {
         options.challenge = EncodingHelper.toByteArray(EncodingHelper.base64UrlDecode(options.challenge));
         options.user.id = EncodingHelper.toByteArray(EncodingHelper.base64Decode(options.user.id));
@@ -88,6 +146,13 @@ export default class CreateCredentialPlugin extends Plugin {
         return options;
     }
 
+    /**
+     * Converts data received from authenticator device to JSON-compatible format
+     *
+     * @param data
+     * @returns {{response: {clientDataJSON: string, attestationObject: string}, rawId: string, id: *, type: *}}
+     * @private
+     */
     _convertAuthenticatorData(data) {
         return {
             id: data.id,

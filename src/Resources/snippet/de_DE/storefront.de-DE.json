@@ -12,6 +12,12 @@
                 "name": "Name",
                 "registeredAt": "Registriert am",
                 "actions": "Aktionen"
+            },
+            "credentialCreationModal": {
+                "title": "Bitte geben Sie einen Namen für ihren Zugangsschlüssel ein.",
+                "inputPlaceholder": "Mein blauer USB-Schlüssel",
+                "buttonCancel": "Abbrechen",
+                "buttonSave": "Speichern"
             }
         },
         "login": {

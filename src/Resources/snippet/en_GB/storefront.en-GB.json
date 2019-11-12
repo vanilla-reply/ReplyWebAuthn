@@ -12,6 +12,12 @@
                 "name": "Name",
                 "registeredAt": "Registered at",
                 "actions": "Actions"
+            },
+            "credentialCreationModal": {
+                "title": "Please enter a name for your new access key.",
+                "inputPlaceholder": "My blue USB key",
+                "buttonCancel": "Cancel",
+                "buttonSave": "Save"
             }
         },
         "login": {
