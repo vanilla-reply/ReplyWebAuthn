@@ -5,7 +5,6 @@ namespace Reply\WebAuthn\Configuration;
 use ArrayIterator;
 use Iterator;
 use IteratorAggregate;
-use Reply\WebAuthn\ReplyWebAuthn;
 
 class Configuration implements IteratorAggregate
 {
@@ -19,7 +18,7 @@ class Configuration implements IteratorAggregate
      */
     public function __construct(array $values)
     {
-        $this->values = array_merge(ReplyWebAuthn::getDefaultConfig(), $values);
+        $this->values = $values;
     }
 
     /**

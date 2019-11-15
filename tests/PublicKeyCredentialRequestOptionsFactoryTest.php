@@ -21,7 +21,10 @@ class PublicKeyCredentialRequestOptionsFactoryTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->config = new Configuration([]);
+        $this->config = new Configuration([
+            'timeout' => 20,
+            'userVerification' => 'preferred'
+        ]);
 
         $configReaderMock = $this
             ->createMock(ConfigurationReader::class);

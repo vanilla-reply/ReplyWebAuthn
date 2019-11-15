@@ -25,6 +25,8 @@ class ConfigurationReader
      */
     public function read(): Configuration
     {
-        return new Configuration($this->systemConfigService->get(ReplyWebAuthn::CONFIG_PREFIX) ?? []);
+        $values = $this->systemConfigService->get(ReplyWebAuthn::CONFIG_PREFIX) ?? [];
+
+        return new Configuration(array_merge(ReplyWebAuthn::getDefaultConfig(), $values));
     }
 }
