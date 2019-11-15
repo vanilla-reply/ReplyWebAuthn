@@ -5,7 +5,8 @@ before_script:
 - apt install -y git unzip
 - curl https://squizlabs.github.io/PHP_CodeSniffer/phpcs.phar --output /usr/local/bin/phpcs
 - curl https://getcomposer.org/composer.phar --output /usr/local/bin/composer
-- chmod +x /usr/local/bin/phpcs /usr/local/bin/composer
+- curl https://phar.phpunit.de/phpunit-8.4.3.phar --output /usr/local/bin/phpunit
+- chmod +x /usr/local/bin/phpcs /usr/local/bin/composer /usr/local/bin/phpunit
 
 check:psr2:
   script:
@@ -15,6 +16,7 @@ build:zip:
   script:
     - rm .gitignore
     - composer install --no-dev --no-interaction --no-suggest --ignore-platform-reqs
+    - phpunit --testdox
     - composer archive --dir build/ --format=zip
   artifacts:
     paths:
