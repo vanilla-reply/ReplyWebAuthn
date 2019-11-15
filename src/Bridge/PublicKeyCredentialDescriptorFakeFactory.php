@@ -7,6 +7,17 @@ use Webauthn\PublicKeyCredentialDescriptor;
 
 class PublicKeyCredentialDescriptorFakeFactory
 {
+    /** @var string */
+    private $secret;
+
+    /**
+     * @param string $secret
+     */
+    public function __construct(string $secret)
+    {
+        $this->secret = $secret;
+    }
+
     /**
      * @param string $username
      * @return PublicKeyCredentialDescriptor
@@ -14,7 +25,7 @@ class PublicKeyCredentialDescriptorFakeFactory
      */
     public function create(string $username): PublicKeyCredentialDescriptor
     {
-        $salt = getenv('APP_SECRET');
+        $salt = $this->secret;
         if (!is_string($salt) || empty($salt)) {
             throw new InvalidConfigurationException('Invalid value for environment variable APP_SECRET');
         }

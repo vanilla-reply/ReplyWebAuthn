@@ -44,7 +44,9 @@
         </service>
 
         <!-- Bridge services -->
-        <service id="Reply\WebAuthn\Bridge\PublicKeyCredentialDescriptorFakeFactory"/>
+        <service id="Reply\WebAuthn\Bridge\PublicKeyCredentialDescriptorFakeFactory">
+            <argument>%env(APP_SECRET)%</argument>
+        </service>
 
         <service id="Reply\WebAuthn\Bridge\AttestationStatementSupportManagerConfigurator">
             <argument id="Reply\WebAuthn\Configuration\ConfigurationReader" type="service"/>

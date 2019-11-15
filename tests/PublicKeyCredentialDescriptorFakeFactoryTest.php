@@ -15,8 +15,8 @@ class PublicKeyCredentialDescriptorFakeFactoryTest extends TestCase
 
     protected function setUp(): void
     {
-        putenv('APP_SECRET=' . bin2hex(random_bytes(16)));
-        $this->subject = new PublicKeyCredentialDescriptorFakeFactory();
+        $secret = bin2hex(random_bytes(16));
+        $this->subject = new PublicKeyCredentialDescriptorFakeFactory($secret);
     }
 
     public function testReturnsSameIdentifierForSameUsername(): void
