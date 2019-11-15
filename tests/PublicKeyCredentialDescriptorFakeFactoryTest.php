@@ -8,20 +8,45 @@ use Webauthn\PublicKeyCredentialDescriptor;
 
 class PublicKeyCredentialDescriptorFakeFactoryTest extends TestCase
 {
-    public function testCreatesReproducibleIdentifiers(): void
+    /**
+     * @var PublicKeyCredentialDescriptorFakeFactory
+     */
+    private $subject;
+
+    protected function setUp(): void
     {
         putenv('APP_SECRET=' . bin2hex(random_bytes(16)));
-        $subject = new PublicKeyCredentialDescriptorFakeFactory();
+        $this->subject = new PublicKeyCredentialDescriptorFakeFactory();
+    }
+
+    public function testReturnsSameIdentifierForSameUsername(): void
+    {
         $username = 'foobar';
 
         /** @var PublicKeyCredentialDescriptor|null $previous */
         $previous = null;
         for ($i = 0; $i < 5; $i++) {
-            $result = $subject->create($username);
+            $result = $this->subject->create($username);
             if ($previous !== null) {
                 self::assertSame($previous->getId(), $result->getId());
             }
             $previous = $result;
         }
+        self::assertNotNull($previous);
+    }
+
+    public function testReturnsDifferentIdentifierForDifferentUsername(): void
+    {
+        /** @var PublicKeyCredentialDescriptor|null $previous */
+        $previous = null;
+        for ($i = 0; $i < 5; $i++) {
+            $username = 'bar' . $i;
+            $result = $this->subject->create($username);
+            if ($previous !== null) {
+                self::assertNotEquals($previous->getId(), $result->getId());
+            }
+            $previous = $result;
+        }
+        self::assertNotNull($previous);
     }
 }
