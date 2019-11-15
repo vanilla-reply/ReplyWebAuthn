@@ -6,6 +6,7 @@ use PHPUnit\Framework\TestCase;
 use Reply\WebAuthn\Bridge\PublicKeyCredentialRequestOptionsFactory;
 use Reply\WebAuthn\Configuration\Configuration;
 use Reply\WebAuthn\Configuration\ConfigurationReader;
+use Webauthn\PublicKeyCredentialDescriptor;
 
 class PublicKeyCredentialRequestOptionsFactoryTest extends TestCase
 {
@@ -39,10 +40,16 @@ class PublicKeyCredentialRequestOptionsFactoryTest extends TestCase
     public function testRequestOptionsFollowConfig(): void
     {
         $hostname = 'example.com';
-        $requestOptions = $this->subject->create($hostname, []);
+        $descriptors = [
+            new PublicKeyCredentialDescriptor('public-key', random_bytes(64))
+        ];
+        $requestOptions = $this->subject->create($hostname, $descriptors);
 
         self::assertSame($this->config->getTimeout() * 1000, $requestOptions->getTimeout());
         self::assertSame($this->config->getUserVerification(), $requestOptions->getUserVerification());
         self::assertSame($hostname, $requestOptions->getRpId());
+
+        self::assertCount(1, $requestOptions->getAllowCredentials());
+        self::assertSame(current($descriptors), current($requestOptions->getAllowCredentials()));
     }
 }
