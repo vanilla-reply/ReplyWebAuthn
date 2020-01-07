@@ -1,8 +1,8 @@
-import Plugin from 'src/script/plugin-system/plugin.class';
-import HttpClient from 'src/script/service/http-client.service';
-import FormSerializeUtil from 'src/script/utility/form/form-serialize.util';
+import Plugin from 'src/plugin-system/plugin.class';
+import HttpClient from 'src/service/http-client.service';
+import FormSerializeUtil from 'src/utility/form/form-serialize.util';
 import EncodingHelper from '../helper/encoding.helper'
-import PageLoadingIndicatorUtil from 'src/script/utility/loading-indicator/page-loading-indicator.util';
+import PageLoadingIndicatorUtil from 'src/utility/loading-indicator/page-loading-indicator.util';
 
 export default class LoginPlugin extends Plugin {
 

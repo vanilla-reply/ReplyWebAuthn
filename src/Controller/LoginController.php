@@ -92,7 +92,7 @@ class LoginController extends AbstractController
     }
 
     /**
-     * @Route("/account/webauthn/login/init", name="frontend.account.webauthn.login.init", methods={"POST"}, defaults={"XmlHttpRequest"=true})
+     * @Route("/account/webauthn/login/init", name="frontend.account.webauthn.login.init", methods={"POST"}, defaults={"csrf_protected"=false, "XmlHttpRequest"=true})
      *
      * @param Request $request
      * @param SalesChannelContext $context
@@ -126,7 +126,7 @@ class LoginController extends AbstractController
     }
 
     /**
-     * @Route("/account/webauthn/login/finalize", name="frontend.account.webauthn.login.finalize", methods={"POST"}, defaults={"XmlHttpRequest"=true})
+     * @Route("/account/webauthn/login/finalize", name="frontend.account.webauthn.login.finalize", methods={"POST"}, defaults={"csrf_protected"=false, "XmlHttpRequest"=true})
      *
      * @param Request $request
      * @param SalesChannelContext $context

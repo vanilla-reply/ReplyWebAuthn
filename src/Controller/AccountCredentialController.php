@@ -94,11 +94,11 @@ class AccountCredentialController extends AbstractController
 
         $page = $this->pageLoader->load($request, $context);
 
-        return $this->renderStorefront('page/account/credential/index.html.twig', ['page' => $page]);
+        return $this->renderStorefront('@ReplyWebAuthn/storefront/page/account/credential/index.html.twig', ['page' => $page]);
     }
 
     /**
-     * @Route("/account/webauthn/credential/creation-options", name="frontend.account.webauthn.credential.creation-options", options={"seo"="false"}, methods={"POST"}, defaults={"XmlHttpRequest"=true})
+     * @Route("/account/webauthn/credential/creation-options", name="frontend.account.webauthn.credential.creation-options", options={"seo"="false"}, methods={"POST"}, defaults={"csrf_protected"=false, "XmlHttpRequest"=true})
      */
     public function creationOptions(SalesChannelContext $context, Request $request): Response
     {
@@ -114,7 +114,7 @@ class AccountCredentialController extends AbstractController
     }
 
     /**
-     * @Route("/account/webauthn/credential/save", name="frontend.account.webauthn.credential.save", options={"seo"="false"}, methods={"POST"}, defaults={"XmlHttpRequest"=true})
+     * @Route("/account/webauthn/credential/save", name="frontend.account.webauthn.credential.save", options={"seo"="false"}, methods={"POST"}, defaults={"csrf_protected"=false, "XmlHttpRequest"=true})
      */
     public function save(Request $request): JsonResponse
     {
@@ -155,7 +155,7 @@ class AccountCredentialController extends AbstractController
     }
 
     /**
-     * @Route("/account/webauthn/credential/delete/{credentialId}", name="frontend.account.webauthn.credential.delete.one", options={"seo"="false"}, methods={"POST"})
+     * @Route("/account/webauthn/credential/delete/{credentialId}", name="frontend.account.webauthn.credential.delete.one", options={"csrf_protected"=false, "seo"="false"}, methods={"POST"})
      */
     public function deleteOne(string $credentialId, SalesChannelContext $salesChannelContext): Response
     {
@@ -171,17 +171,17 @@ class AccountCredentialController extends AbstractController
     }
 
     /**
-     * @Route("/widgets/account/webauthn/credential/creation-modal", name="frontend.account.webauthn.credential.creation-modal", options={"seo"=false}, methods={"GET"}, defaults={"XmlHttpRequest"=true})
+     * @Route("/widgets/account/webauthn/credential/creation-modal", name="frontend.account.webauthn.credential.creation-modal", options={"csrf_protected"=false, "seo"=false}, methods={"GET"}, defaults={"XmlHttpRequest"=true})
      */
     public function renderCreationModal(): Response
     {
         $this->denyAccessUnlessLoggedIn();
 
-        return $this->renderStorefront('component/account/credential-creation-modal.html.twig');
+        return $this->renderStorefront('@ReplyWebAuthn/storefront/component/account/credential-creation-modal.html.twig');
     }
 
     /**
-     * @Route("/account/webauthn/credential/delete", name="frontend.account.webauthn.credential.delete.all", options={"seo"="false"}, methods={"POST"})
+     * @Route("/account/webauthn/credential/delete", name="frontend.account.webauthn.credential.delete.all", options={"csrf_protected"=false, "seo"="false"}, methods={"POST"})
      */
     public function deleteAll(SalesChannelContext $salesChannelContext): Response
     {

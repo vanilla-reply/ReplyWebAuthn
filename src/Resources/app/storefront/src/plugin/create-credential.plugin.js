@@ -1,9 +1,9 @@
-import Plugin from 'src/script/plugin-system/plugin.class';
-import HttpClient from 'src/script/service/http-client.service';
+import Plugin from 'src/plugin-system/plugin.class';
+import HttpClient from 'src/service/http-client.service';
 import EncodingHelper from '../helper/encoding.helper';
-import PageLoadingIndicatorUtil from 'src/script/utility/loading-indicator/page-loading-indicator.util';
-import PseudoModalUtil from 'src/script/utility/modal-extension/pseudo-modal.util';
-import DomAccess from 'src/script/helper/dom-access.helper';
+import PageLoadingIndicatorUtil from 'src/utility/loading-indicator/page-loading-indicator.util';
+import PseudoModalUtil from 'src/utility/modal-extension/pseudo-modal.util';
+import DomAccess from 'src/helper/dom-access.helper';
 
 export default class CreateCredentialPlugin extends Plugin {
 
