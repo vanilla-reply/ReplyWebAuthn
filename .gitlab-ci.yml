@@ -17,3 +17,7 @@ build:7.3:
     paths:
       - build/
     expire_in: 1 week
+
+build:7.4:
+  image: php:7.4
+  script: ./build.sh
