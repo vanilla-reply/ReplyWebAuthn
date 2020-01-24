@@ -8,25 +8,11 @@ before_script:
 
 build:7.2:
   image: php:7.2
-  script:
-    - phpcs --standard=PSR2 --extensions=php --warning-severity=0 .
-    - rm .gitignore
-    - composer install --no-dev --no-interaction --no-suggest --ignore-platform-reqs
-    - phpunit --testdox
-    - composer archive --dir build/ --format=zip
-  artifacts:
-    paths:
-      - build/
-    expire_in: 1 week
+  script: ./build.sh
 
 build:7.3:
   image: php:7.3
-  script:
-    - phpcs --standard=PSR2 --extensions=php --warning-severity=0 .
-    - rm .gitignore
-    - composer install --no-dev --no-interaction --no-suggest --ignore-platform-reqs
-    - phpunit --testdox
-    - composer archive --dir build/ --format=zip
+  script: ./build.sh
   artifacts:
     paths:
       - build/
