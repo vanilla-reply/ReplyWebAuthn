@@ -116,6 +116,12 @@
             <label>Require Resident Keys</label>
             <label lang="de-DE">Resident Keys erforderlich</label>
         </input-field>
+
+        <input-field type="bool">
+            <name>allowMultipleCredentialsPerAuthenticator</name>
+            <label>Allow multiple credentials per authenticator device</label>
+            <label lang="de-DE">Erlaube mehrere Schlüssel pro Gerät</label>
+        </input-field>
     </card>
 
 </config>

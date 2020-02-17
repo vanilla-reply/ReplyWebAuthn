@@ -106,7 +106,12 @@ class AccountCredentialController extends AbstractController
 
         $userEntity = EntityConverter::toUserEntity($context->getCustomer());
 
-        $options = $this->creationOptionsFactory->create($this->getRpEntity($request), $userEntity);
+        $existingCredentials = [];
+        foreach ($this->credentialRepository->findAllForUserEntity($userEntity) as $credentialSource) {
+            $existingCredentials[] = $credentialSource->getPublicKeyCredentialDescriptor();
+        }
+
+        $options = $this->creationOptionsFactory->create($this->getRpEntity($request), $userEntity, $existingCredentials);
 
         $request->getSession()->set(self::CREATION_OPTIONS_SESSION_KEY, json_encode($options));
 

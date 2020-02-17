@@ -103,7 +103,8 @@ class ReplyWebAuthn extends Plugin
                 'rs256',
                 'rs384',
                 'rs512'
-            ]
+            ],
+            'allowMultipleCredentialsPerAuthenticator' => true
         ];
     }
 }

@@ -70,6 +70,14 @@ class Configuration implements IteratorAggregate
     }
 
     /**
+     * @return bool
+     */
+    public function areMultipleCredentialsPerAuthenticatorAllowed(): bool
+    {
+        return $this->values['allowMultipleCredentialsPerAuthenticator'];
+    }
+
+    /**
      * @return Iterator
      */
     public function getIterator(): Iterator

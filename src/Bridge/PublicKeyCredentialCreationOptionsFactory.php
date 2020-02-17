@@ -37,9 +37,10 @@ class PublicKeyCredentialCreationOptionsFactory
     /**
      * @param PublicKeyCredentialRpEntity $rpEntity
      * @param PublicKeyCredentialUserEntity $userEntity
+     * @param PublicKeyCredentialDescriptor[] $existingCredentials
      * @return PublicKeyCredentialCreationOptions
      */
-    public function create(PublicKeyCredentialRpEntity $rpEntity, PublicKeyCredentialUserEntity $userEntity): PublicKeyCredentialCreationOptions
+    public function create(PublicKeyCredentialRpEntity $rpEntity, PublicKeyCredentialUserEntity $userEntity, array $existingCredentials): PublicKeyCredentialCreationOptions
     {
         $config = $this->configurationReader->read();
 
@@ -49,7 +50,7 @@ class PublicKeyCredentialCreationOptionsFactory
             Challenge::generate(),
             $this->buildCredentialParametersList(),
             $config->getTimeout() * 1000,
-            [],
+            $config->areMultipleCredentialsPerAuthenticatorAllowed() ? [] : $existingCredentials,
             $this->getAuthenticatorSelectionCriteria($config),
             $config->getAttestation(),
             null

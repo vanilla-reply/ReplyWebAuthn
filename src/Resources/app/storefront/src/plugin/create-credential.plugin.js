@@ -143,6 +143,12 @@ export default class CreateCredentialPlugin extends Plugin {
         options.challenge = EncodingHelper.toByteArray(EncodingHelper.base64UrlDecode(options.challenge));
         options.user.id = EncodingHelper.toByteArray(EncodingHelper.base64Decode(options.user.id));
 
+        if (options.excludeCredentials && options.excludeCredentials instanceof Array) {
+            options.excludeCredentials.map(function (credential) {
+                credential.id = EncodingHelper.toByteArray(EncodingHelper.base64UrlDecode(credential.id));
+            });
+        }
+
         return options;
     }
 
