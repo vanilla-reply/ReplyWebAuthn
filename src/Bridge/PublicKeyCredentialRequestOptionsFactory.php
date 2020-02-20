@@ -26,10 +26,11 @@ class PublicKeyCredentialRequestOptionsFactory
      */
     public function create(string $hostname, array $descriptors): PublicKeyCredentialRequestOptions
     {
+        $challenge = new Challenge();
         $config = $this->configurationReader->read();
 
         return new PublicKeyCredentialRequestOptions(
-            Challenge::generate(),
+            $challenge->asBytes(),
             $config->getTimeout() * 1000,
             $hostname,
             $descriptors,

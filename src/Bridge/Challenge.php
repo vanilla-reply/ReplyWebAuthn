@@ -4,11 +4,19 @@ namespace Reply\WebAuthn\Bridge;
 
 class Challenge
 {
+    /** @var string */
+    private $bytes;
+
+    public function __construct()
+    {
+        $this->bytes = random_bytes(32);
+    }
+
     /**
      * @return string
      */
-    public static function generate(): string
+    public function asBytes(): string
     {
-        return random_bytes(32);
+        return $this->bytes;
     }
 }
