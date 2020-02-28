@@ -98,7 +98,7 @@
 
         <service id="Webauthn\AuthenticatorAssertionResponseValidator">
             <argument id="Reply\WebAuthn\Bridge\PublicKeyCredentialSourceRepository" type="service"/>
-            <argument id="foo-bar" type="service" on-invalid="null"/>
+            <argument>null</argument>
             <argument id="Webauthn\TokenBinding\TokenBindingNotSupportedHandler" type="service"/>
             <argument id="Webauthn\AuthenticationExtensions\ExtensionOutputCheckerHandler" type="service"/>
             <argument id="Cose\Algorithm\Manager" type="service"/>
