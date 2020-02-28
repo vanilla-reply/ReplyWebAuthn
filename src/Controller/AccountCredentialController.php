@@ -160,7 +160,7 @@ class AccountCredentialController extends AbstractController
     }
 
     /**
-     * @Route("/account/webauthn/credential/delete/{credentialId}", name="frontend.account.webauthn.credential.delete.one", options={"csrf_protected"=false, "seo"="false"}, methods={"POST"})
+     * @Route("/account/webauthn/credential/delete/{credentialId}", name="frontend.account.webauthn.credential.delete.one", options={"csrf_protected"=true, "seo"="false"}, methods={"POST"})
      */
     public function deleteOne(string $credentialId, SalesChannelContext $salesChannelContext): Response
     {
