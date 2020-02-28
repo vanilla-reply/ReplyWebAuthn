@@ -186,20 +186,6 @@ class AccountCredentialController extends AbstractController
     }
 
     /**
-     * @Route("/account/webauthn/credential/delete", name="frontend.account.webauthn.credential.delete.all", options={"csrf_protected"=false, "seo"="false"}, methods={"POST"})
-     */
-    public function deleteAll(SalesChannelContext $salesChannelContext): Response
-    {
-        $this->denyAccessUnlessLoggedIn();
-
-        $this->credentialRepository->deleteAllForUserEntity(
-            EntityConverter::toUserEntity($salesChannelContext->getCustomer())
-        );
-
-        return $this->redirectToRoute('frontend.account.credential.page');
-    }
-
-    /**
      * @param Request $request
      * @return PublicKeyCredentialRpEntity
      */
