@@ -9,11 +9,10 @@ use Doctrine\DBAL\FetchMode;
 use InvalidArgumentException;
 use Ramsey\Uuid\Uuid;
 use Webauthn\PublicKeyCredentialSource as BaseSource;
-use Webauthn\PublicKeyCredentialSourceRepository;
 use Webauthn\PublicKeyCredentialUserEntity;
 use Webauthn\TrustPath\TrustPathLoader;
 
-class DoctrineCustomerCredentialRepository implements PublicKeyCredentialSourceRepository, CustomerCredentialRepository
+class DoctrinePublicKeyCredentialSourceRepository implements PublicKeyCredentialSourceRepository
 {
     public const TABLE_NAME = 'customer_credential';
 

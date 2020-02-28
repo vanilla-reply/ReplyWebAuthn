@@ -2,7 +2,7 @@
 
 namespace Reply\WebAuthn\Page\Account\Credential;
 
-use Reply\WebAuthn\Bridge\CustomerCredentialRepository;
+use Reply\WebAuthn\Bridge\PublicKeyCredentialSourceRepository;
 use Reply\WebAuthn\Bridge\EntityConverter;
 use Shopware\Core\Checkout\Cart\Exception\CustomerNotLoggedInException;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Request;
 class AccountCredentialPageLoader
 {
     /**
-     * @var CustomerCredentialRepository
+     * @var PublicKeyCredentialSourceRepository
      */
     private $credentialRepository;
 
@@ -28,12 +28,12 @@ class AccountCredentialPageLoader
     private $eventDispatcher;
 
     /**
-     * @param CustomerCredentialRepository $credentialRepository
+     * @param PublicKeyCredentialSourceRepository $credentialRepository
      * @param GenericPageLoader $genericLoader
      * @param EventDispatcherInterface $eventDispatcher
      */
     public function __construct(
-        CustomerCredentialRepository $credentialRepository,
+        PublicKeyCredentialSourceRepository $credentialRepository,
         GenericPageLoader $genericLoader,
         EventDispatcherInterface $eventDispatcher
     ) {

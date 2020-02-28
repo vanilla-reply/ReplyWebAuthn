@@ -2,7 +2,8 @@
 
 namespace Reply\WebAuthn\Controller;
 
-use Reply\WebAuthn\Bridge\CustomerCredentialRepository;
+use Exception;
+use Reply\WebAuthn\Bridge\PublicKeyCredentialSourceRepository;
 use Reply\WebAuthn\Bridge\EntityConverter;
 use Reply\WebAuthn\Bridge\PublicKeyCredentialDescriptorFakeFactory;
 use Reply\WebAuthn\Bridge\PublicKeyCredentialRequestOptionsFactory;
@@ -35,7 +36,7 @@ class LoginController extends AbstractController
     private $accountService;
 
     /**
-     * @var CustomerCredentialRepository
+     * @var PublicKeyCredentialSourceRepository
      */
     private $credentialRepository;
 
@@ -66,7 +67,7 @@ class LoginController extends AbstractController
 
     /**
      * @param AccountService $accountService
-     * @param CustomerCredentialRepository $credentialRepository
+     * @param PublicKeyCredentialSourceRepository $credentialRepository
      * @param PublicKeyCredentialDescriptorFakeFactory $fakeFactory
      * @param PublicKeyCredentialRequestOptionsFactory $requestOptionsFactory
      * @param PublicKeyCredentialLoader $credentialLoader
@@ -75,7 +76,7 @@ class LoginController extends AbstractController
      */
     public function __construct(
         AccountService $accountService,
-        CustomerCredentialRepository $credentialRepository,
+        PublicKeyCredentialSourceRepository $credentialRepository,
         PublicKeyCredentialDescriptorFakeFactory $fakeFactory,
         PublicKeyCredentialRequestOptionsFactory $requestOptionsFactory,
         PublicKeyCredentialLoader $credentialLoader,
@@ -134,12 +135,6 @@ class LoginController extends AbstractController
      */
     public function finalize(Request $request, SalesChannelContext $context): Response
     {
-        $credential = $this->credentialLoader->load($request->getContent());
-
-        if (!$credential->getResponse() instanceof AuthenticatorAssertionResponse) {
-            return $this->createErrorResponse('Authenticator response does not contain assertion.');
-        }
-
         $requestOptionsJson = $request->getSession()->get(self::REQUEST_OPTIONS_SESSION_KEY);
         $username = $request->getSession()->get(self::USERNAME_SESSION_KEY);
         if (!is_string($requestOptionsJson) || !is_string($username)) {
@@ -158,6 +153,12 @@ class LoginController extends AbstractController
             $userHandle = Uuid::randomBytes();
         }
 
+        $credential = $this->credentialLoader->load($request->getContent());
+
+        if (!$credential->getResponse() instanceof AuthenticatorAssertionResponse) {
+            return $this->createErrorResponse('Authenticator response does not contain assertion.');
+        }
+
         try {
             $this->authenticatorAssertionResponseValidator->check(
                 $credential->getRawId(),
@@ -166,7 +167,7 @@ class LoginController extends AbstractController
                 $this->httpMessageFactory->createRequest($request),
                 $userHandle
             );
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $this->createErrorResponse('Authentication failed');
         }
 

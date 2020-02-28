@@ -3,7 +3,7 @@
 namespace Reply\WebAuthn\Controller;
 
 use Base64Url\Base64Url;
-use Reply\WebAuthn\Bridge\CustomerCredentialRepository;
+use Reply\WebAuthn\Bridge\PublicKeyCredentialSourceRepository;
 use Reply\WebAuthn\Bridge\EntityConverter;
 use Reply\WebAuthn\Bridge\PublicKeyCredentialSource;
 use Reply\WebAuthn\Bridge\PublicKeyCredentialCreationOptionsFactory;
@@ -40,7 +40,7 @@ class AccountCredentialController extends AbstractController
     private $creationOptionsFactory;
 
     /**
-     * @var CustomerCredentialRepository
+     * @var PublicKeyCredentialSourceRepository
      */
     private $credentialRepository;
 
@@ -62,7 +62,7 @@ class AccountCredentialController extends AbstractController
     /**
      * @param AccountCredentialPageLoader $pageLoader
      * @param PublicKeyCredentialCreationOptionsFactory $creationOptionsFactory
-     * @param CustomerCredentialRepository $credentialRepository
+     * @param PublicKeyCredentialSourceRepository $credentialRepository
      * @param PublicKeyCredentialLoader $credentialLoader
      * @param AuthenticatorAttestationResponseValidator $authenticatorAttestationResponseValidator
      * @param HttpMessageFactoryInterface $httpMessageFactory
@@ -70,7 +70,7 @@ class AccountCredentialController extends AbstractController
     public function __construct(
         AccountCredentialPageLoader $pageLoader,
         PublicKeyCredentialCreationOptionsFactory $creationOptionsFactory,
-        CustomerCredentialRepository $credentialRepository,
+        PublicKeyCredentialSourceRepository $credentialRepository,
         PublicKeyCredentialLoader $credentialLoader,
         AuthenticatorAttestationResponseValidator $authenticatorAttestationResponseValidator,
         HttpMessageFactoryInterface $httpMessageFactory
