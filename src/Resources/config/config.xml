@@ -71,6 +71,10 @@
                     <id>tpm</id>
                     <name>Trusted Platform Module</name>
                 </option>
+                <option>
+                    <id>packed</id>
+                    <name>Packed</name>
+                </option>
             </options>
         </input-field>
 
