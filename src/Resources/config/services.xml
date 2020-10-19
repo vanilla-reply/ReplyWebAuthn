@@ -36,6 +36,7 @@
             <argument id="Webauthn\PublicKeyCredentialLoader" type="service"/>
             <argument id="Webauthn\AuthenticatorAssertionResponseValidator" type="service"/>
             <argument id="Symfony\Bridge\PsrHttpMessage\Factory\PsrHttpFactory" type="service"/>
+            <argument type="service" id="customer.repository"/>
         </service>
 
         <!-- Configuration services -->

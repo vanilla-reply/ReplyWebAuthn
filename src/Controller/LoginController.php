@@ -7,8 +7,12 @@ use Reply\WebAuthn\Bridge\PublicKeyCredentialSourceRepository;
 use Reply\WebAuthn\Bridge\EntityConverter;
 use Reply\WebAuthn\Bridge\PublicKeyCredentialDescriptorFakeFactory;
 use Reply\WebAuthn\Bridge\PublicKeyCredentialRequestOptionsFactory;
+use Shopware\Core\Checkout\Customer\Exception\BadCredentialsException;
 use Shopware\Core\Checkout\Customer\Exception\CustomerNotFoundException;
 use Shopware\Core\Checkout\Customer\SalesChannel\AccountService;
+use Shopware\Core\Framework\DataAbstractionLayer\EntityRepositoryInterface;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 use Shopware\Core\Framework\Routing\Annotation\RouteScope;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
@@ -65,6 +69,9 @@ class LoginController extends AbstractController
      */
     private $httpMessageFactory;
 
+    /** @var EntityRepositoryInterface $customerRepository */
+    private $customerRepository;
+
     /**
      * @param AccountService $accountService
      * @param PublicKeyCredentialSourceRepository $credentialRepository
@@ -81,7 +88,8 @@ class LoginController extends AbstractController
         PublicKeyCredentialRequestOptionsFactory $requestOptionsFactory,
         PublicKeyCredentialLoader $credentialLoader,
         AuthenticatorAssertionResponseValidator $authenticatorAssertionResponseValidator,
-        HttpMessageFactoryInterface $httpMessageFactory
+        HttpMessageFactoryInterface $httpMessageFactory,
+        EntityRepositoryInterface $entityRepository
     ) {
         $this->accountService = $accountService;
         $this->credentialRepository = $credentialRepository;
@@ -90,6 +98,7 @@ class LoginController extends AbstractController
         $this->credentialLoader = $credentialLoader;
         $this->authenticatorAssertionResponseValidator = $authenticatorAssertionResponseValidator;
         $this->httpMessageFactory = $httpMessageFactory;
+        $this->customerRepository = $entityRepository;
     }
 
     /**
@@ -107,7 +116,7 @@ class LoginController extends AbstractController
         }
 
         try {
-            $customer = $this->accountService->getCustomerByEmail($username, $context);
+            $customer = $this->getCustomerByEmail($username, $context);
             $userEntity = EntityConverter::toUserEntity($customer);
             $descriptors = [];
             foreach ($this->credentialRepository->findAllForUserEntity($userEntity) as $credentialSource) {
@@ -124,6 +133,20 @@ class LoginController extends AbstractController
         $request->getSession()->set(self::REQUEST_OPTIONS_SESSION_KEY, json_encode($requestOptions));
 
         return new JsonResponse($requestOptions);
+    }
+
+    protected function getCustomerByEmail($email, SalesChannelContext $context)
+    {
+        $criteria = new Criteria();
+        $criteria->addFilter(new EqualsFilter('customer.email', $email));
+
+        $result = $this->customerRepository->search($criteria, $context->getContext());
+
+        if ($result->count() !== 1) {
+            throw new BadCredentialsException();
+        }
+
+        return $result->first();
     }
 
     /**
@@ -145,7 +168,7 @@ class LoginController extends AbstractController
         $requestOptions = PublicKeyCredentialRequestOptions::createFromString($requestOptionsJson);
 
         try {
-            $customer = $this->accountService->getCustomerByEmail($username, $context);
+            $customer = $this->getCustomerByEmail($username, $context);
             $userEntity = EntityConverter::toUserEntity($customer);
             $userHandle = $userEntity->getId();
         } catch (CustomerNotFoundException $e) {
