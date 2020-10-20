@@ -19,6 +19,11 @@ class CredentialRegistrationService
     private $creationOptionsFactory;
 
     /**
+     * @var PublicKeyCredentialCreationOptionsRepository
+     */
+    private $creationOptionsRepository;
+
+    /**
      * @var PublicKeyCredentialSourceRepository
      */
     private $credentialRepository;
@@ -33,9 +38,17 @@ class CredentialRegistrationService
      */
     private $authenticatorAttestationResponseValidator;
 
-    public function __construct(PublicKeyCredentialCreationOptionsFactory $creationOptionsFactory, PublicKeyCredentialSourceRepository $credentialRepository, PublicKeyCredentialLoader $credentialLoader, AuthenticatorAttestationResponseValidator $authenticatorAttestationResponseValidator)
+    /**
+     * @param PublicKeyCredentialCreationOptionsFactory $creationOptionsFactory
+     * @param PublicKeyCredentialCreationOptionsRepository $creationOptionsRepository
+     * @param PublicKeyCredentialSourceRepository $credentialRepository
+     * @param PublicKeyCredentialLoader $credentialLoader
+     * @param AuthenticatorAttestationResponseValidator $authenticatorAttestationResponseValidator
+     */
+    public function __construct(PublicKeyCredentialCreationOptionsFactory $creationOptionsFactory, PublicKeyCredentialCreationOptionsRepository $creationOptionsRepository, PublicKeyCredentialSourceRepository $credentialRepository, PublicKeyCredentialLoader $credentialLoader, AuthenticatorAttestationResponseValidator $authenticatorAttestationResponseValidator)
     {
         $this->creationOptionsFactory = $creationOptionsFactory;
+        $this->creationOptionsRepository = $creationOptionsRepository;
         $this->credentialRepository = $credentialRepository;
         $this->credentialLoader = $credentialLoader;
         $this->authenticatorAttestationResponseValidator = $authenticatorAttestationResponseValidator;
@@ -51,10 +64,16 @@ class CredentialRegistrationService
             $existingCredentials[] = $credentialSource->getPublicKeyCredentialDescriptor();
         }
 
-        return $this->creationOptionsFactory->create($this->getRpEntity($request), $userEntity, $existingCredentials);
+        $rpEntity = $this->getRpEntity($request);
+
+        $options = $this->creationOptionsFactory->create($rpEntity, $userEntity, $existingCredentials);
+
+        $this->creationOptionsRepository->save($options);
+
+        return $options;
     }
 
-    public function register(ServerRequestInterface $request, PublicKeyCredentialCreationOptions $creationOptions): void
+    public function register(ServerRequestInterface $request, PublicKeyCredentialUserEntity $userEntity): void
     {
         $parsedBody = (array)$request->getParsedBody();
         $credential = $this->credentialLoader->loadArray($parsedBody['credential'] ?? []);
@@ -71,6 +90,12 @@ class CredentialRegistrationService
 
         if (!$authenticatorResponse instanceof AuthenticatorAttestationResponse) {
             throw new CredentialRegistrationFailedException('Authenticator response does not contain attestation.');
+        }
+
+        $creationOptions = $this->creationOptionsRepository->fetch($userEntity->getId());
+
+        if ($creationOptions === null) {
+            throw new CredentialRegistrationFailedException('Could not find creation options.');
         }
 
         $credentialSource = $this->authenticatorAttestationResponseValidator->check(

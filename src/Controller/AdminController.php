@@ -93,12 +93,9 @@ class AdminController
     {
         $user = $this->getUserFromContext($context);
 
-        // TODO: Fetch creation options by userId
-        $creationOptions = null;
-
         $this->credentialRegistrationService->register(
             $this->httpMessageFactory->createRequest($request),
-            $creationOptions
+            $this->convertUser($user)
         );
 
         return new JsonResponse();
@@ -138,7 +135,7 @@ class AdminController
     {
         return new PublicKeyCredentialUserEntity(
             $swUser->getUsername(),
-            $swUser->getId(),
+            hex2bin($swUser->getId()),
             $swUser->getUsername()
         );
     }

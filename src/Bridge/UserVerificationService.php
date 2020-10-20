@@ -24,6 +24,11 @@ class UserVerificationService
     private $requestOptionsFactory;
 
     /**
+     * @var PublicKeyCredentialRequestOptionsRepository
+     */
+    private $requestOptionsRepository;
+
+    /**
      * @var PublicKeyCredentialLoader
      */
     private $credentialLoader;
@@ -41,6 +46,7 @@ class UserVerificationService
     /**
      * @param PublicKeyCredentialSourceRepository $credentialRepository
      * @param PublicKeyCredentialRequestOptionsFactory $requestOptionsFactory
+     * @param PublicKeyCredentialRequestOptionsRepository $requestOptionsRepository
      * @param PublicKeyCredentialLoader $credentialLoader
      * @param AuthenticatorAssertionResponseValidator $authenticatorAssertionResponseValidator
      * @param PublicKeyCredentialDescriptorFakeFactory $credentialDescriptorFakeFactory
@@ -48,12 +54,14 @@ class UserVerificationService
     public function __construct(
         PublicKeyCredentialSourceRepository $credentialRepository,
         PublicKeyCredentialRequestOptionsFactory $requestOptionsFactory,
+        PublicKeyCredentialRequestOptionsRepository $requestOptionsRepository,
         PublicKeyCredentialLoader $credentialLoader,
         AuthenticatorAssertionResponseValidator $authenticatorAssertionResponseValidator,
         PublicKeyCredentialDescriptorFakeFactory $credentialDescriptorFakeFactory
     ) {
         $this->credentialRepository = $credentialRepository;
         $this->requestOptionsFactory = $requestOptionsFactory;
+        $this->requestOptionsRepository = $requestOptionsRepository;
         $this->credentialLoader = $credentialLoader;
         $this->authenticatorAssertionResponseValidator = $authenticatorAssertionResponseValidator;
         $this->credentialDescriptorFakeFactory = $credentialDescriptorFakeFactory;
@@ -81,18 +89,20 @@ class UserVerificationService
             }
         }
 
-        return $this->requestOptionsFactory->create($request->getUri()->getHost(), $descriptors);
+        $options = $this->requestOptionsFactory->create($request->getUri()->getHost(), $descriptors);
+
+        $this->requestOptionsRepository->save($userHandle, $options);
+
+        return $options;
     }
 
     /**
      * @param ServerRequestInterface $request
-     * @param PublicKeyCredentialRequestOptions $requestOptions
      * @param string|null $userHandle
      * @return string verified userHandle
      */
     public function verify(
         ServerRequestInterface $request,
-        PublicKeyCredentialRequestOptions $requestOptions,
         ?string $userHandle
     ): string {
         $parsedBody = (array)$request->getParsedBody();
@@ -103,6 +113,12 @@ class UserVerificationService
 
         if (!($authenticatorResponse instanceof AuthenticatorAssertionResponse)) {
             throw new AuthFailedException('Authenticator response did not contain assertion.');
+        }
+
+        $requestOptions = $this->requestOptionsRepository->fetch($userHandle);
+
+        if ($requestOptions == null) {
+            throw new AuthFailedException('Could not find request options');
         }
 
         try {
