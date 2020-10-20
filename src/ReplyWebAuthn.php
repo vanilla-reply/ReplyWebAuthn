@@ -112,6 +112,31 @@ class ReplyWebAuthn extends Plugin
                 CHECK (JSON_VALID(`trust_path`))
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
         ');
+
+        $connection->executeQuery('
+            CREATE TABLE IF NOT EXISTS `user_credential` (
+              `id` varbinary(255) NOT NULL PRIMARY KEY,
+              `user_handle` binary(16),
+              `name` varchar(255) NOT NULL,
+              `type` varchar(255) NOT NULL,
+              `transports` json NOT NULL,
+              `attestation_type` varchar(255) NOT NULL,
+              `trust_path` json NOT NULL,
+              `aaguid` varchar(255) NOT NULL,
+              `public_key` varbinary(255) NOT NULL,
+              `counter` int(11) NOT NULL,
+              `created_at` datetime(3) NOT NULL,
+              `updated_at` datetime(3),
+              CONSTRAINT `fk.user_credential.user_handle` FOREIGN KEY (`user_handle`)
+                REFERENCES `user` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
+              CONSTRAINT `uniq.user_credential.public_key`
+                UNIQUE (`public_key`),
+              CONSTRAINT `json.user_credential.transports`
+                CHECK (JSON_VALID(`transports`)),
+              CONSTRAINT `json.user_credential.trust_path`
+                CHECK (JSON_VALID(`trust_path`))
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        ');
     }
 
     /**
