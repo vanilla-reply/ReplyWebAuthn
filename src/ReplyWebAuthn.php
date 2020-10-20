@@ -137,6 +137,26 @@ class ReplyWebAuthn extends Plugin
                 CHECK (JSON_VALID(`trust_path`))
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
         ');
+
+        $connection->executeQuery('
+            CREATE TABLE IF NOT EXISTS `webauthn_creation_options` (
+              `user_handle` binary(16) NOT NULL PRIMARY KEY,
+              `payload` json NOT NULL,
+              `created_at` datetime(3) NOT NULL,
+              CONSTRAINT `json.webauthn_creation_options.payload`
+                CHECK (JSON_VALID(`payload`))
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        ');
+
+        $connection->executeQuery('
+            CREATE TABLE IF NOT EXISTS `webauthn_request_options` (
+              `user_handle` binary(16) NOT NULL PRIMARY KEY,
+              `payload` json NOT NULL,
+              `created_at` datetime(3) NOT NULL,
+              CONSTRAINT `json.webauthn_request_options.payload`
+                CHECK (JSON_VALID(`payload`))
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        ');
     }
 
     /**
