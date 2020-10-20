@@ -22,6 +22,7 @@
         },
         "login": {
             "useWebAuthn": "Use security key"
-        }
+        },
+        "none-secure-warning": "WebAuthn only works over https, please use https!"
     }
 }
