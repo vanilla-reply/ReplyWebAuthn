@@ -19,6 +19,12 @@
         </service>
 
         <!-- Controller -->
+        <service id="Reply\WebAuthn\Controller\AdminController" public="true">
+            <argument type="service" id="user.repository"/>
+            <argument type="service" id="Reply\WebAuthn\Bridge\UserVerificationService"/>
+            <argument type="service" id="Reply\WebAuthn\Bridge\CredentialRegistrationService"/>
+            <argument type="service" id="Symfony\Bridge\PsrHttpMessage\Factory\PsrHttpFactory"/>
+        </service>
         <service id="Reply\WebAuthn\Controller\AccountCredentialController" public="true">
             <argument id="Reply\WebAuthn\Page\Account\Credential\AccountCredentialPageLoader" type="service"/>
             <argument id="Reply\WebAuthn\Bridge\PublicKeyCredentialCreationOptionsFactory" type="service"/>
@@ -45,6 +51,27 @@
         </service>
 
         <!-- Bridge services -->
+        <service id="Reply\WebAuthn\Bridge\Oauth\ApiAuthenticationListener">
+            <tag name="kernel.event_subscriber"/>
+            <argument type="service" id="shopware.api.authorization_server"/>
+            <argument type="service" id="Shopware\Core\Framework\Api\OAuth\RefreshTokenRepository"/>
+            <argument type="service" id="Reply\WebAuthn\Bridge\UserVerificationService"/>
+        </service>
+        <service id="Reply\WebAuthn\Bridge\UserVerificationService">
+            <argument id="Reply\WebAuthn\Bridge\PublicKeyCredentialSourceRepository" type="service"/>
+            <argument id="Reply\WebAuthn\Bridge\PublicKeyCredentialRequestOptionsFactory" type="service"/>
+            <argument id="Webauthn\PublicKeyCredentialLoader" type="service"/>
+            <argument id="Webauthn\AuthenticatorAssertionResponseValidator" type="service"/>
+            <argument id="Reply\WebAuthn\Bridge\PublicKeyCredentialDescriptorFakeFactory" type="service"/>
+        </service>
+        <service id="Reply\WebAuthn\Bridge\CredentialRegistrationService">
+            <argument type="service" id="Reply\WebAuthn\Bridge\PublicKeyCredentialCreationOptionsFactory"/>
+            <argument type="service" id="Reply\WebAuthn\Bridge\PublicKeyCredentialSourceRepository"/>
+            <argument type="service" id="Webauthn\PublicKeyCredentialLoader"/>
+            <argument type="service" id="Webauthn\AuthenticatorAttestationResponseValidator"/>
+        </service>
+        <service id="Reply\WebAuthn\Bridge\Oauth\ClientRepository"/>
+
         <service id="Reply\WebAuthn\Bridge\PublicKeyCredentialDescriptorFakeFactory">
             <argument>%env(APP_SECRET)%</argument>
         </service>
