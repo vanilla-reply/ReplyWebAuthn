@@ -37,6 +37,49 @@
             }
         }
 
+        class ConverterHelper {
+
+            /**
+             * Converts data received from navigator.credentials.get() to JSON-compatible format
+             *
+             * @param data
+             * @returns {{response: {clientDataJSON: string, authenticatorData: string, signature: string}, rawId: string, id: *, type: *}}
+             */
+            static convertAuthenticatorData(data) {
+                return {
+                    id: data.id,
+                    type: data.type,
+                    rawId: EncodingHelper.arrayToBase64String(new Uint8Array(data.rawId)),
+                    response: {
+                        authenticatorData: EncodingHelper.arrayToBase64String(new Uint8Array(data.response.authenticatorData)),
+                        clientDataJSON: EncodingHelper.arrayToBase64String(new Uint8Array(data.response.clientDataJSON)),
+                        signature: EncodingHelper.arrayToBase64String(new Uint8Array(data.response.signature)),
+                        userHandle: data.response.userHandle ? EncodingHelper.arrayToBase64String(new Uint8Array(data.response.userHandle)) : null,
+                    },
+                };
+            }
+
+            /**
+             * Converts login options from server response to format required by navigator.credentials.get()
+             *
+             * @param options
+             * @returns {{options: {challenge: Uint8Array}}}
+             */
+            static convertOptions(options) {
+                options.challenge = EncodingHelper.toByteArray(EncodingHelper.base64UrlDecode(options.challenge));
+                if (options.allowCredentials) {
+                    options.allowCredentials = options.allowCredentials.map(function(data) {
+                        return {
+                            ...data,
+                            'id': EncodingHelper.toByteArray(EncodingHelper.base64UrlDecode(data.id)),
+                        };
+                    });
+                }
+
+                return options;
+            }
+        }
+
         class WebauthnLoginHandler {
 
             selectors = {
@@ -51,7 +94,7 @@
             init() {
                 var div = document.createElement('div');
                 var button = document.createElement('button');
-                button.innerText = 'foobar';
+                button.innerText = 'Ohne Passwort einloggen';
                 button.classList.add('sw-button');
                 div.appendChild(button);
 
@@ -67,7 +110,7 @@
                     username: document.querySelector(this.selectors.usernameInput).value
                 }).then(function(response) {
                     response.json().then(data => {
-                        const options = self._convertLoginOptions(data);
+                        const options = ConverterHelper.convertOptions(data);
                         navigator.credentials.get({publicKey: options})
                             .then(self._sendLoginRequest.bind(self), error => {
                                 console.log(error.toString()); // Example: timeout, interaction refused...
@@ -77,7 +120,7 @@
             }
 
             _sendLoginRequest(authenticatorData) {
-                const loginRequest = this._convertAuthenticatorData(authenticatorData);
+                const loginRequest = ConverterHelper.convertAuthenticatorData(authenticatorData);
 
                 console.log('Sending login request to server', loginRequest);
 
@@ -88,34 +131,6 @@
                 response.json().then(data => {
                     console.log('_onLoginSuccess', data);
                 });
-            }
-
-            _convertAuthenticatorData(data) {
-                return {
-                    id: data.id,
-                    type: data.type,
-                    rawId: EncodingHelper.arrayToBase64String(new Uint8Array(data.rawId)),
-                    response: {
-                        authenticatorData: EncodingHelper.arrayToBase64String(new Uint8Array(data.response.authenticatorData)),
-                        clientDataJSON: EncodingHelper.arrayToBase64String(new Uint8Array(data.response.clientDataJSON)),
-                        signature: EncodingHelper.arrayToBase64String(new Uint8Array(data.response.signature)),
-                        userHandle: data.response.userHandle ? EncodingHelper.arrayToBase64String(new Uint8Array(data.response.userHandle)) : null,
-                    },
-                };
-            }
-
-            _convertLoginOptions(options) {
-                options.challenge = EncodingHelper.toByteArray(EncodingHelper.base64UrlDecode(options.challenge));
-                if (options.allowCredentials) {
-                    options.allowCredentials = options.allowCredentials.map(function(data) {
-                        return {
-                            ...data,
-                            'id': EncodingHelper.toByteArray(EncodingHelper.base64UrlDecode(data.id)),
-                        };
-                    });
-                }
-
-                return options;
             }
 
             _sendRequest(url, data) {
