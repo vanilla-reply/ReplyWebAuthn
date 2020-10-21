@@ -4,34 +4,18 @@
     <script nonce="{{ cspNonce }}">
         class EncodingHelper {
 
-            /**
-             * @param {string} data
-             * @returns {string}
-             */
             static base64UrlDecode(data) {
                 return window.atob(data.replace(/_/g, '/').replace(/-/g, '+'));
             }
 
-            /**
-             * @param {string} data
-             * @returns {string}
-             */
             static base64Decode(data) {
                 return window.atob(data);
             }
 
-            /**
-             * @param {Uint8Array} array
-             * @returns {string}
-             */
             static arrayToBase64String(array) {
                 return window.btoa(String.fromCharCode(...array));
             }
 
-            /**
-             * @param {string} string
-             * @returns {Uint8Array}
-             */
             static toByteArray(string) {
                 return Uint8Array.from(string, c=>c.charCodeAt(0));
             }
@@ -39,12 +23,6 @@
 
         class ConverterHelper {
 
-            /**
-             * Converts data received from navigator.credentials.get() to JSON-compatible format
-             *
-             * @param data
-             * @returns {{response: {clientDataJSON: string, authenticatorData: string, signature: string}, rawId: string, id: *, type: *}}
-             */
             static convertAuthenticatorData(data) {
                 return {
                     id: data.id,
@@ -59,12 +37,6 @@
                 };
             }
 
-            /**
-             * Converts login options from server response to format required by navigator.credentials.get()
-             *
-             * @param options
-             * @returns {{options: {challenge: Uint8Array}}}
-             */
             static convertOptions(options) {
                 options.challenge = EncodingHelper.toByteArray(EncodingHelper.base64UrlDecode(options.challenge));
                 if (options.allowCredentials) {
