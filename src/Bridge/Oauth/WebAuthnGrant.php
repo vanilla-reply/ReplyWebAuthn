@@ -10,6 +10,7 @@ use League\OAuth2\Server\Repositories\RefreshTokenRepositoryInterface;
 use League\OAuth2\Server\RequestEvent;
 use League\OAuth2\Server\ResponseTypes\ResponseTypeInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Reply\WebAuthn\Bridge\UserIdResolver;
 use Reply\WebAuthn\Bridge\UserVerificationService;
 use Reply\WebAuthn\Exception\AuthFailedException;
 use Shopware\Core\Framework\Api\OAuth\User\User;
@@ -21,17 +22,22 @@ class WebAuthnGrant extends AbstractGrant
      */
     private $userVerificationService;
 
+    /** @var UserIdResolver */
+    private $userIdResolver;
+
     /**
      * @param RefreshTokenRepositoryInterface $refreshTokenRepository
      * @param UserVerificationService $userVerificationService
      */
     public function __construct(
         RefreshTokenRepositoryInterface $refreshTokenRepository,
-        UserVerificationService $userVerificationService
+        UserVerificationService $userVerificationService,
+        UserIdResolver $userIdResolver
     ) {
         $this->setRefreshTokenRepository($refreshTokenRepository);
         $this->setRefreshTokenTTL(new \DateInterval('P1M'));
         $this->userVerificationService = $userVerificationService;
+        $this->userIdResolver = $userIdResolver;
     }
 
     public function getIdentifier(): string
@@ -79,15 +85,11 @@ class WebAuthnGrant extends AbstractGrant
     protected function validateUser(ServerRequestInterface $request): UserEntityInterface
     {
         $username = (string)$this->getRequestParameter('username', $request);
-        $credential = (array)$this->getRequestParameter('credential', $request);
 
-        // TODO: Resolve user ID from username
-        $userId = strtolower('750A50B2F3084A598B35066343EEEE46');
-        // TODO: Fetch request options from repository
-        $requestOptions = null;
+        $userId = $this->userIdResolver->getUserIdByName($username);
 
         try {
-            $userId = $this->userVerificationService->verify($request, $requestOptions, $userId);
+            $userId = $this->userVerificationService->verify($request, $userId);
         } catch (AuthFailedException $e) {
             $this->getEmitter()->emit(new RequestEvent(RequestEvent::USER_AUTHENTICATION_FAILED, $request));
 

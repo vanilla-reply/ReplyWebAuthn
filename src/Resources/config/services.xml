@@ -24,6 +24,7 @@
             <argument type="service" id="Reply\WebAuthn\Bridge\UserVerificationService"/>
             <argument type="service" id="Reply\WebAuthn\Bridge\CredentialRegistrationService"/>
             <argument type="service" id="Symfony\Bridge\PsrHttpMessage\Factory\PsrHttpFactory"/>
+            <argument type="service" id="Reply\WebAuthn\Bridge\UserIdResolver"/>
         </service>
         <service id="Reply\WebAuthn\Controller\AccountCredentialController" public="true">
             <argument id="Reply\WebAuthn\Page\Account\Credential\AccountCredentialPageLoader" type="service"/>
@@ -56,6 +57,7 @@
             <argument type="service" id="shopware.api.authorization_server"/>
             <argument type="service" id="Shopware\Core\Framework\Api\OAuth\RefreshTokenRepository"/>
             <argument type="service" id="Reply\WebAuthn\Bridge\UserVerificationService"/>
+            <argument type="service" id="Reply\WebAuthn\Bridge\UserIdResolver"/>
         </service>
         <service id="Reply\WebAuthn\Bridge\UserVerificationService">
             <argument id="Reply\WebAuthn\Bridge\PublicKeyCredentialSourceRepository" type="service"/>
@@ -157,6 +159,10 @@
         </service>
         <service id="Reply\WebAuthn\Bridge\PublicKeyCredentialRequestOptionsRepository">
             <argument id="Doctrine\DBAL\Connection" type="service"></argument>
+        </service>
+
+        <service id="Reply\WebAuthn\Bridge\UserIdResolver">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
         </service>
 
         <service id="Cose\Algorithm\Signature\RSA\RS256">

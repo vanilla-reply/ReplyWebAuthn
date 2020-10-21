@@ -3,6 +3,7 @@
 namespace Reply\WebAuthn\Controller;
 
 use Reply\WebAuthn\Bridge\CredentialRegistrationService;
+use Reply\WebAuthn\Bridge\UserIdResolver;
 use Reply\WebAuthn\Bridge\UserVerificationService;
 use Reply\WebAuthn\Exception\CredentialRegistrationFailedException;
 use Shopware\Core\Framework\Api\Context\AdminApiSource;
@@ -10,7 +11,6 @@ use Shopware\Core\Framework\Api\Context\Exception\InvalidContextSourceException;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepositoryInterface;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
-use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 use Shopware\Core\Framework\Routing\Annotation\RouteScope;
 use Shopware\Core\System\User\UserEntity;
 use Symfony\Bridge\PsrHttpMessage\HttpMessageFactoryInterface;
@@ -44,16 +44,21 @@ class AdminController
      */
     private $httpMessageFactory;
 
+    /** @var UserIdResolver */
+    private $userIdResolver;
+
     public function __construct(
         EntityRepositoryInterface $userRepository,
         UserVerificationService $userVerificationService,
         CredentialRegistrationService $credentialRegistrationService,
-        HttpMessageFactoryInterface $httpMessageFactory
+        HttpMessageFactoryInterface $httpMessageFactory,
+        UserIdResolver $userIdResolver
     ) {
         $this->userRepository = $userRepository;
         $this->userVerificationService = $userVerificationService;
         $this->credentialRegistrationService = $credentialRegistrationService;
         $this->httpMessageFactory = $httpMessageFactory;
+        $this->userIdResolver = $userIdResolver;
     }
 
     /**
@@ -61,7 +66,7 @@ class AdminController
      */
     public function generateLoginOptions(Request $request, Context $context): JsonResponse
     {
-        $userId = $this->getUserIdByName($request->request->get('username'), $context);
+        $userId = $this->userIdResolver->getUserIdByName($request->request->get('username'));
 
         $options = $this->userVerificationService->challenge(
             $this->httpMessageFactory->createRequest($request),
@@ -101,14 +106,7 @@ class AdminController
         return new JsonResponse();
     }
 
-    private function getUserIdByName(string $username, Context $context): ?string
-    {
-        $criteria = (new Criteria())->addFilter(new EqualsFilter('username', $username));
 
-        $ids = $this->userRepository->searchIds($criteria, $context)->getIds();
-
-        return array_shift($ids);
-    }
 
     private function getUserFromContext(Context $context): UserEntity
     {
