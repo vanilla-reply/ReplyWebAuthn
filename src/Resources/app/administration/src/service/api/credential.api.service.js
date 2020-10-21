@@ -1,8 +1,9 @@
-import ApiService from 'src/core/service/api.service';
+const ApiService = Shopware.Classes.ApiService;
 
-class CredentialApiService extends ApiService {
+class CredentialApiService {
     constructor(httpClient, loginService) {
-        super(httpClient, loginService);
+        this.httpClient = httpClient;
+        this.loginService = loginService;
         this.name = 'credentialApiService';
     }
 

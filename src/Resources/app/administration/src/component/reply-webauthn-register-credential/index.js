@@ -8,13 +8,24 @@ Shopware.Component.register('reply-webauthn-register-credential', {
 
     methods: {
         registerCredential() {
-            console.log('register!');
-            // TODO: use this.credentialApiService.challenge() to get creationOptions
-            // TODO: convert creationOptions with ConverterHelper
-            // TODO: get credential via navigator.credentials.create({publicKey: options})
-            // TODO: convert credential with ConverterHelper.convertAuthenticatorData()
-            // TODO: Add a name to the converted credential
-            // TODO: use this.credentialApiService.register() to register credential
+            this.credentialApiService.challenge().then((options) => {
+                console.log('Received creation options from server.');
+                console.log('Trying to communicate with local authenticator.');
+
+                navigator.credentials.create({
+                    publicKey: ConverterHelper.convertOptions(options)
+                }).then((authenticatorData) => {
+                    console.log('Received data from local authenticator.');
+
+                    const credential = ConverterHelper.convertAuthenticatorData(authenticatorData);
+                    credential.name = 'foobar';
+
+                    console.log('Sending credential to server.');
+                    this.credentialApiService.register(credential).then(() => {
+                        console.log('Credential successfully registered.');
+                    });
+                });
+            });
         }
     },
 });

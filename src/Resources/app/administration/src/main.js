@@ -12,5 +12,7 @@ Shopware.Component.override('sw-profile-index', {
 
 Shopware.Application
     .addServiceProvider('credentialApiService', (container) => {
-        return new CredentialApiService(container.httpClient, container.loginService);
+        const initContainer = Shopware.Application.getContainer('init');
+        const httpClient = initContainer.httpClient;
+        return new CredentialApiService(httpClient, container.loginService);
     });
