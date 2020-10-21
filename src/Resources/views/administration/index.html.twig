@@ -84,9 +84,8 @@
                 this._sendRequest(this.urls.challenge, {
                     username: document.querySelector(this.selectors.usernameInput).value
                 }).then(function(response) {
-                    response.json().then(data => {
-                        const options = ConverterHelper.convertOptions(data);
-                        navigator.credentials.get({publicKey: options})
+                    response.json().then(options => {
+                        navigator.credentials.get({publicKey: ConverterHelper.convertOptions(options)})
                             .then(self._sendTokenRequest.bind(self), error => {
                                 console.log(error.toString()); // Example: timeout, interaction refused...
                             });
@@ -110,9 +109,8 @@
                         self._setBearerAuthentication({
                             access: data.access_token,
                             refresh: data.refresh_token,
-                            expiry: data.expires_in
+                            expiry: (new Date).getTime() + data.expires_in
                         });
-                        window.sessionStorage.removeItem('sw-login-should-reload');
                         window.location.href = '/admin';
                     });
                 });
@@ -127,13 +125,10 @@
              *
              * @param {string} key
              * @param {string} value
-             * @param {number} expires as unix timestamp
              * @private
              */
-            _setCookie(key, value, expires) {
-                const date = new Date(expires*1000);
-
-                document.cookie = `${key}=${value};expires=${date.toUTCString()};path=/`;
+            _setCookie(key, value) {
+                document.cookie = `${key}=${value};expires=-1;path=/admin`;
             }
 
             _sendRequest(url, data) {
