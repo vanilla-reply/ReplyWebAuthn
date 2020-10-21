@@ -62,9 +62,9 @@ class AdminController
     }
 
     /**
-     * @Route("/api/v{version}/_action/reply-webauthn/login-options", name="api.action.reply_webauthn.login-options", methods={"POST"})
+     * @Route("/api/v{version}/_action/reply-webauthn/login-options", name="api.action.reply_webauthn.login-options", defaults={"auth_required"=false}, methods={"POST"})
      */
-    public function generateLoginOptions(Request $request, Context $context): JsonResponse
+    public function generateLoginOptions(Request $request): JsonResponse
     {
         $userId = $this->userIdResolver->getUserIdByName($request->request->get('username'));
 
