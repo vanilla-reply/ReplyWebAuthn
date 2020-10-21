@@ -1,0 +1,6 @@
+{
+    "reply-webauthn": {
+        "titleWebAuthnCard": "Passwordless authentication",
+        "buttonRegisterCredential": "Register credential"
+    }
+}

@@ -1,0 +1,6 @@
+{
+    "reply-webauthn": {
+        "titleWebAuthnCard": "Passwortlose Authentifizierung",
+        "buttonRegisterCredential": "Schlüssel hinzufügen"
+    }
+}
