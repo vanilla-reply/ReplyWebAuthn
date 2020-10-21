@@ -1,0 +1,138 @@
+{% sw_extends '@Administration/administration/index.html.twig' %}
+
+{% block administration_templates %}
+    <script nonce="{{ cspNonce }}">
+        class EncodingHelper {
+
+            /**
+             * @param {string} data
+             * @returns {string}
+             */
+            static base64UrlDecode(data) {
+                return window.atob(data.replace(/_/g, '/').replace(/-/g, '+'));
+            }
+
+            /**
+             * @param {string} data
+             * @returns {string}
+             */
+            static base64Decode(data) {
+                return window.atob(data);
+            }
+
+            /**
+             * @param {Uint8Array} array
+             * @returns {string}
+             */
+            static arrayToBase64String(array) {
+                return window.btoa(String.fromCharCode(...array));
+            }
+
+            /**
+             * @param {string} string
+             * @returns {Uint8Array}
+             */
+            static toByteArray(string) {
+                return Uint8Array.from(string, c=>c.charCodeAt(0));
+            }
+        }
+
+        class WebauthnLoginHandler {
+
+            selectors = {
+                usernameInput: '#sw-field--username'
+            }
+
+            urls = {
+                challenge: '/api/v1/_action/reply-webauthn/login-options',
+                login: '/api/oauth/token'
+            }
+
+            init() {
+                var div = document.createElement('div');
+                var button = document.createElement('button');
+                button.innerText = 'foobar';
+                button.classList.add('sw-button');
+                div.appendChild(button);
+
+                button.addEventListener('click', this._doLogin.bind(this));
+
+                document.querySelector('.sw-login__submit').appendChild(div);
+            }
+
+            _doLogin(event) {
+                event.preventDefault();
+                const self = this;
+                this._sendRequest(this.urls.challenge, {
+                    username: document.querySelector(this.selectors.usernameInput).value
+                }).then(function(response) {
+                    response.json().then(data => {
+                        const options = self._convertLoginOptions(data);
+                        navigator.credentials.get({publicKey: options})
+                            .then(self._sendLoginRequest.bind(self), error => {
+                                console.log(error.toString()); // Example: timeout, interaction refused...
+                            });
+                    });
+                });
+            }
+
+            _sendLoginRequest(authenticatorData) {
+                const loginRequest = this._convertAuthenticatorData(authenticatorData);
+
+                console.log('Sending login request to server', loginRequest);
+
+                this._sendRequest(this.urls.login, loginRequest).then(this._onLoginSuccess.bind(this));
+            }
+
+            _onLoginSuccess(response) {
+                response.json().then(data => {
+                    console.log('_onLoginSuccess', data);
+                });
+            }
+
+            _convertAuthenticatorData(data) {
+                return {
+                    id: data.id,
+                    type: data.type,
+                    rawId: EncodingHelper.arrayToBase64String(new Uint8Array(data.rawId)),
+                    response: {
+                        authenticatorData: EncodingHelper.arrayToBase64String(new Uint8Array(data.response.authenticatorData)),
+                        clientDataJSON: EncodingHelper.arrayToBase64String(new Uint8Array(data.response.clientDataJSON)),
+                        signature: EncodingHelper.arrayToBase64String(new Uint8Array(data.response.signature)),
+                        userHandle: data.response.userHandle ? EncodingHelper.arrayToBase64String(new Uint8Array(data.response.userHandle)) : null,
+                    },
+                };
+            }
+
+            _convertLoginOptions(options) {
+                options.challenge = EncodingHelper.toByteArray(EncodingHelper.base64UrlDecode(options.challenge));
+                if (options.allowCredentials) {
+                    options.allowCredentials = options.allowCredentials.map(function(data) {
+                        return {
+                            ...data,
+                            'id': EncodingHelper.toByteArray(EncodingHelper.base64UrlDecode(data.id)),
+                        };
+                    });
+                }
+
+                return options;
+            }
+
+            _sendRequest(url, data) {
+                return window.fetch(url, {
+                    headers : {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    method: 'POST',
+                    body: JSON.stringify(data)
+                });
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            let webauthn = new WebauthnLoginHandler();
+            webauthn.init();
+        });
+    </script>
+{% endblock %}
