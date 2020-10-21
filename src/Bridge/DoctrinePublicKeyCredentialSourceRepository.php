@@ -14,7 +14,7 @@ use Webauthn\TrustPath\TrustPathLoader;
 
 class DoctrinePublicKeyCredentialSourceRepository implements PublicKeyCredentialSourceRepository
 {
-    public const TABLE_NAME = 'customer_credential';
+    public const TABLE_NAME = 'webauthn_credential';
 
     /**
      * @var Connection
