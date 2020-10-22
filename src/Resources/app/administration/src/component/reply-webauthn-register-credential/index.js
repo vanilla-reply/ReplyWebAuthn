@@ -37,7 +37,7 @@ Shopware.Component.register('reply-webauthn-register-credential', {
         }
     },
     async created () {
-        const repository = this.repositoryFactory.create('reply_webauthn_credential');
+        const repository = this.repositoryFactory.create('webauthn_credential');
         repository.search(new Criteria(), Shopware.Context.api)
             .then((result) => {
                 console.log(result);

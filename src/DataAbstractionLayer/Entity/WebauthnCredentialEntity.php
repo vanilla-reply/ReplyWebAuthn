@@ -36,6 +36,16 @@ class WebauthnCredentialEntity extends Entity
     /** @var int */
     protected $counter;
 
+    public function jsonSerialize(): array
+    {
+        $vars = parent::jsonSerialize();
+
+        $vars['externalId'] = bin2hex($vars['externalId']);
+        $vars['publicKey'] = bin2hex($vars['publicKey']);
+
+        return $vars;
+    }
+
     /**
      * @return string
      */

@@ -2,7 +2,7 @@
 
 namespace Reply\WebAuthn\DataAbstractionLayer\Definition;
 
-use ReplyWebAuthn\DataAbstractionLayer\Entity\WebauthnCredentialCollection;
+use Reply\WebAuthn\DataAbstractionLayer\Entity\WebauthnCredentialCollection;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityDefinition;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\CreatedAtField;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\Flag\PrimaryKey;
@@ -13,11 +13,11 @@ use Shopware\Core\Framework\DataAbstractionLayer\Field\JsonField;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\StringField;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\UpdatedAtField;
 use Shopware\Core\Framework\DataAbstractionLayer\FieldCollection;
-use ReplyWebAuthn\DataAbstractionLayer\Entity\WebauthnCredentialEntity;
+use Reply\WebAuthn\DataAbstractionLayer\Entity\WebauthnCredentialEntity;
 
 class WebauthnCredentialDefinition extends EntityDefinition
 {
-    public const ENTITY_NAME = 'reply_webauthn_credential';
+    public const ENTITY_NAME = 'webauthn_credential';
 
     public function getEntityName(): string
     {
@@ -38,7 +38,7 @@ class WebauthnCredentialDefinition extends EntityDefinition
     {
         return new FieldCollection([
             (new IdField('id', 'id'))->setFlags(new PrimaryKey(), new Required()),
-            (new IdField('external_id', 'external_id')),
+            (new StringField('external_id', 'externalId')),
             (new IdField('user_handle', 'userHandle')),
             (new StringField('name', 'name'))->setFlags(new Required()),
             (new StringField('type', 'type'))->setFlags(new Required()),
