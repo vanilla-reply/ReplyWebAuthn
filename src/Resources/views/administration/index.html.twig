@@ -97,24 +97,6 @@
             }
         }
 
-        class TokenStorage {
-
-            setBearerAuthentication({ access, refresh, expiry }) {
-                const authObject = { access, refresh, expiry };
-                this._setCookie('bearerAuth', encodeURIComponent(JSON.stringify(authObject)));
-            }
-
-            /**
-             *
-             * @param {string} key
-             * @param {string} value
-             * @private
-             */
-            _setCookie(key, value) {
-                document.cookie = `${key}=${value};expires=-1;path=/admin`;
-            }
-        }
-
         class WebauthnLoginHandler {
 
             selectors = {
@@ -126,7 +108,7 @@
                 const submitContainer = document.querySelector(this.selectors.submitContainer);
                 if (submitContainer) {
                     this.apiClient = new ApiClient();
-                    this.tokenStorage = new TokenStorage();
+                    this.loginService = Shopware.Application.getContainer('service').loginService;
 
                     var div = document.createElement('div');
                     var button = document.createElement('button');
@@ -149,10 +131,10 @@
                         .then(authenticatorData => {
                             const credential = ConverterHelper.convertAuthenticatorData(authenticatorData);
                             self.apiClient.verify(username, credential).then(response => {
-                                self.tokenStorage.setBearerAuthentication({
+                                self.loginService.setBearerAuthentication({
                                     access: response.access_token,
                                     refresh: response.refresh_token,
-                                    expiry: (new Date).getTime() + response.expires_in
+                                    expiry: response.expires_in
                                 });
                                 window.location.href = '/admin';
                             });
