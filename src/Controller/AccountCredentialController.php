@@ -3,10 +3,9 @@
 namespace Reply\WebAuthn\Controller;
 
 use Base64Url\Base64Url;
-use Reply\WebAuthn\Bridge\PublicKeyCredentialSourceRepository;
+use Reply\WebAuthn\Bridge\CredentialRegistrationService;
 use Reply\WebAuthn\Bridge\EntityConverter;
-use Reply\WebAuthn\Bridge\PublicKeyCredentialSource;
-use Reply\WebAuthn\Bridge\PublicKeyCredentialCreationOptionsFactory;
+use Reply\WebAuthn\Bridge\PublicKeyCredentialSourceRepository;
 use Reply\WebAuthn\Page\Account\Credential\AccountCredentialPageLoader;
 use Shopware\Core\Checkout\Cart\Exception\CustomerNotLoggedInException;
 use Shopware\Core\Framework\Routing\Annotation\RouteScope;
@@ -16,18 +15,16 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Webauthn\AuthenticatorAttestationResponse;
-use Webauthn\AuthenticatorAttestationResponseValidator;
-use Webauthn\PublicKeyCredentialCreationOptions;
-use Webauthn\PublicKeyCredentialLoader;
-use Webauthn\PublicKeyCredentialRpEntity;
 
 /**
  * @RouteScope(scopes={"storefront"})
  */
 class AccountCredentialController extends AbstractController
 {
-    private const CREATION_OPTIONS_SESSION_KEY = 'WebAuthnCredentialCreationOptions';
+    /**
+     * @var CredentialRegistrationService
+     */
+    private $credentialRegistrationService;
 
     /**
      * @var AccountCredentialPageLoader
@@ -35,24 +32,9 @@ class AccountCredentialController extends AbstractController
     private $pageLoader;
 
     /**
-     * @var PublicKeyCredentialCreationOptionsFactory
-     */
-    private $creationOptionsFactory;
-
-    /**
      * @var PublicKeyCredentialSourceRepository
      */
     private $credentialRepository;
-
-    /**
-     * @var PublicKeyCredentialLoader
-     */
-    private $credentialLoader;
-
-    /**
-     * @var AuthenticatorAttestationResponseValidator
-     */
-    private $authenticatorAttestationResponseValidator;
 
     /**
      * @var HttpMessageFactoryInterface
@@ -60,26 +42,16 @@ class AccountCredentialController extends AbstractController
     private $httpMessageFactory;
 
     /**
+     * @param CredentialRegistrationService $credentialRegistrationService
      * @param AccountCredentialPageLoader $pageLoader
-     * @param PublicKeyCredentialCreationOptionsFactory $creationOptionsFactory
      * @param PublicKeyCredentialSourceRepository $credentialRepository
-     * @param PublicKeyCredentialLoader $credentialLoader
-     * @param AuthenticatorAttestationResponseValidator $authenticatorAttestationResponseValidator
      * @param HttpMessageFactoryInterface $httpMessageFactory
      */
-    public function __construct(
-        AccountCredentialPageLoader $pageLoader,
-        PublicKeyCredentialCreationOptionsFactory $creationOptionsFactory,
-        PublicKeyCredentialSourceRepository $credentialRepository,
-        PublicKeyCredentialLoader $credentialLoader,
-        AuthenticatorAttestationResponseValidator $authenticatorAttestationResponseValidator,
-        HttpMessageFactoryInterface $httpMessageFactory
-    ) {
+    public function __construct(CredentialRegistrationService $credentialRegistrationService, AccountCredentialPageLoader $pageLoader, PublicKeyCredentialSourceRepository $credentialRepository, HttpMessageFactoryInterface $httpMessageFactory)
+    {
+        $this->credentialRegistrationService = $credentialRegistrationService;
         $this->pageLoader = $pageLoader;
-        $this->creationOptionsFactory = $creationOptionsFactory;
         $this->credentialRepository = $credentialRepository;
-        $this->credentialLoader = $credentialLoader;
-        $this->authenticatorAttestationResponseValidator = $authenticatorAttestationResponseValidator;
         $this->httpMessageFactory = $httpMessageFactory;
     }
 
@@ -98,63 +70,35 @@ class AccountCredentialController extends AbstractController
     }
 
     /**
-     * @Route("/account/webauthn/credential/creation-options", name="frontend.account.webauthn.credential.creation-options", options={"seo"="false"}, methods={"POST"}, defaults={"csrf_protected"=false, "XmlHttpRequest"=true})
+     * @Route("/account/webauthn/credential/challenge", name="frontend.account.webauthn.credential.challenge", options={"seo"="false"}, methods={"POST"}, defaults={"csrf_protected"=false, "XmlHttpRequest"=true})
      */
-    public function creationOptions(SalesChannelContext $context, Request $request): Response
+    public function challenge(SalesChannelContext $context, Request $request): Response
     {
         $this->denyAccessUnlessLoggedIn();
 
         $userEntity = EntityConverter::toUserEntity($context->getCustomer());
 
-        $existingCredentials = [];
-        foreach ($this->credentialRepository->findAllForUserEntity($userEntity) as $credentialSource) {
-            $existingCredentials[] = $credentialSource->getPublicKeyCredentialDescriptor();
-        }
-
-        $options = $this->creationOptionsFactory->create($this->getRpEntity($request), $userEntity, $existingCredentials);
-
-        $request->getSession()->set(self::CREATION_OPTIONS_SESSION_KEY, json_encode($options));
+        $options = $this->credentialRegistrationService->challenge(
+            $this->httpMessageFactory->createRequest($request),
+            $userEntity
+        );
 
         return new JsonResponse($options);
     }
 
     /**
-     * @Route("/account/webauthn/credential/save", name="frontend.account.webauthn.credential.save", options={"seo"="false"}, methods={"POST"}, defaults={"csrf_protected"=false, "XmlHttpRequest"=true})
+     * @Route("/account/webauthn/credential/register", name="frontend.account.webauthn.credential.register", options={"seo"="false"}, methods={"POST"}, defaults={"csrf_protected"=false, "XmlHttpRequest"=true})
      */
-    public function save(Request $request): JsonResponse
+    public function register(SalesChannelContext $context, Request $request): JsonResponse
     {
         $this->denyAccessUnlessLoggedIn();
 
-        $credentialName = $request->request->get('name');
-        if (!is_string($credentialName) || $credentialName === '') {
-            return $this->createErrorResponse('Missing or invalid request parameter "name"');
-        }
+        $userEntity = EntityConverter::toUserEntity($context->getCustomer());
 
-        $credential = $this->credentialLoader->loadArray($request->request->all());
-        if (strlen($credential->getRawId()) > 255) {
-            return $this->createErrorResponse('Credential ID exceeds maximum length of 255 bytes');
-        }
-
-        $response = $credential->getResponse();
-        if (!$response instanceof AuthenticatorAttestationResponse) {
-            return $this->createErrorResponse('Authenticator response does not contain attestation.');
-        }
-
-        $creationOptionsJson = $request->getSession()->get(self::CREATION_OPTIONS_SESSION_KEY);
-        if (!is_string($creationOptionsJson)) {
-            return $this->createErrorResponse('Saving credential has not been initialized properly.');
-        }
-
-        /** @var PublicKeyCredentialCreationOptions $creationOptions */
-        $creationOptions = PublicKeyCredentialCreationOptions::createFromString($creationOptionsJson);
-        $psrRequest = $this->httpMessageFactory->createRequest($request);
-        $credentialSource = $this->authenticatorAttestationResponseValidator->check($response, $creationOptions, $psrRequest);
-
-        $entity = PublicKeyCredentialSource::createFromBase($credentialSource);
-        $entity->setName($credentialName);
-
-        $this->credentialRepository->saveCredentialSource($entity);
-        $request->getSession()->remove(self::CREATION_OPTIONS_SESSION_KEY);
+        $this->credentialRegistrationService->register(
+            $this->httpMessageFactory->createRequest($request),
+            $userEntity
+        );
 
         return new JsonResponse();
     }
@@ -183,20 +127,5 @@ class AccountCredentialController extends AbstractController
         $this->denyAccessUnlessLoggedIn();
 
         return $this->renderStorefront('@ReplyWebAuthn/storefront/component/account/credential-creation-modal.html.twig');
-    }
-
-    /**
-     * @param Request $request
-     * @return PublicKeyCredentialRpEntity
-     */
-    private function getRpEntity(Request $request): PublicKeyCredentialRpEntity
-    {
-        $host = $request->getHost();
-
-        return new PublicKeyCredentialRpEntity(
-            $host,
-            $host,
-            null
-        );
     }
 }

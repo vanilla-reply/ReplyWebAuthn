@@ -1,0 +1,7 @@
+{
+    "reply-webauthn": {
+        "titleWebAuthnCard": "Passwordless authentication",
+        "buttonRegisterCredential": "Register credential",
+        "credentialPlaceholder": "My blue usb stick"
+    }
+}

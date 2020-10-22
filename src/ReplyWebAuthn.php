@@ -12,6 +12,7 @@ use Shopware\Core\Framework\Plugin;
 use Shopware\Core\Framework\Plugin\Context\InstallContext;
 use Shopware\Core\Framework\Plugin\Context\UninstallContext;
 use Shopware\Core\System\SystemConfig\SystemConfigService;
+use function Aws\map;
 
 class ReplyWebAuthn extends Plugin
 {
@@ -83,14 +84,25 @@ class ReplyWebAuthn extends Plugin
      */
     private function dropTables(Connection $connection): void
     {
-        $connection->executeQuery("DROP TABLE IF EXISTS `customer_credential`");
+        $tables = [
+            'customer_credential',
+            'user_credential',
+            'webauthn_credential',
+            'webauthn_creation_options',
+            'webauthn_request_options'
+        ];
+
+        foreach ($tables as $table) {
+            $connection->executeQuery("DROP TABLE IF EXISTS `$table`");
+        }
     }
 
     private function createTables(Connection $connection): void
     {
         $connection->executeQuery('
-            CREATE TABLE IF NOT EXISTS `customer_credential` (
-              `id` varbinary(255) NOT NULL PRIMARY KEY,
+            CREATE TABLE IF NOT EXISTS `webauthn_credential` (
+              `id` binary(16) NOT NULL PRIMARY KEY,
+              `external_id` varbinary(255) NOT NULL,
               `user_handle` binary(16),
               `name` varchar(255) NOT NULL,
               `type` varchar(255) NOT NULL,
@@ -102,38 +114,11 @@ class ReplyWebAuthn extends Plugin
               `counter` int(11) NOT NULL,
               `created_at` datetime(3) NOT NULL,
               `updated_at` datetime(3),
-              CONSTRAINT `fk.customer_credential.user_handle` FOREIGN KEY (`user_handle`)
-                REFERENCES `customer` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
-              CONSTRAINT `uniq.customer_credential.public_key`
+              CONSTRAINT `uniq.webauthn_credential.public_key`
                 UNIQUE (`public_key`),
-              CONSTRAINT `json.customer_credential.transports`
+              CONSTRAINT `json.webauthn_credential.transports`
                 CHECK (JSON_VALID(`transports`)),
-              CONSTRAINT `json.customer_credential.trust_path`
-                CHECK (JSON_VALID(`trust_path`))
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-        ');
-
-        $connection->executeQuery('
-            CREATE TABLE IF NOT EXISTS `user_credential` (
-              `id` varbinary(255) NOT NULL PRIMARY KEY,
-              `user_handle` binary(16),
-              `name` varchar(255) NOT NULL,
-              `type` varchar(255) NOT NULL,
-              `transports` json NOT NULL,
-              `attestation_type` varchar(255) NOT NULL,
-              `trust_path` json NOT NULL,
-              `aaguid` varchar(255) NOT NULL,
-              `public_key` varbinary(255) NOT NULL,
-              `counter` int(11) NOT NULL,
-              `created_at` datetime(3) NOT NULL,
-              `updated_at` datetime(3),
-              CONSTRAINT `fk.user_credential.user_handle` FOREIGN KEY (`user_handle`)
-                REFERENCES `user` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
-              CONSTRAINT `uniq.user_credential.public_key`
-                UNIQUE (`public_key`),
-              CONSTRAINT `json.user_credential.transports`
-                CHECK (JSON_VALID(`transports`)),
-              CONSTRAINT `json.user_credential.trust_path`
+              CONSTRAINT `json.webauthn_credential.trust_path`
                 CHECK (JSON_VALID(`trust_path`))
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
         ');

@@ -1,0 +1,162 @@
+{% sw_extends '@Administration/administration/index.html.twig' %}
+
+{% block administration_templates %}
+    <script nonce="{{ cspNonce }}">
+        class EncodingHelper {
+
+            static base64UrlDecode(data) {
+                return window.atob(data.replace(/_/g, '/').replace(/-/g, '+'));
+            }
+
+            static base64Decode(data) {
+                return window.atob(data);
+            }
+
+            static arrayToBase64String(array) {
+                return window.btoa(String.fromCharCode(...array));
+            }
+
+            static toByteArray(string) {
+                return Uint8Array.from(string, c=>c.charCodeAt(0));
+            }
+        }
+
+        class ConverterHelper {
+
+            static convertAuthenticatorData(data) {
+                return {
+                    id: data.id,
+                    type: data.type,
+                    rawId: EncodingHelper.arrayToBase64String(new Uint8Array(data.rawId)),
+                    response: {
+                        authenticatorData: EncodingHelper.arrayToBase64String(new Uint8Array(data.response.authenticatorData)),
+                        clientDataJSON: EncodingHelper.arrayToBase64String(new Uint8Array(data.response.clientDataJSON)),
+                        signature: EncodingHelper.arrayToBase64String(new Uint8Array(data.response.signature)),
+                        userHandle: data.response.userHandle ? EncodingHelper.arrayToBase64String(new Uint8Array(data.response.userHandle)) : null,
+                    },
+                };
+            }
+
+            static convertOptions(options) {
+                options.challenge = EncodingHelper.toByteArray(EncodingHelper.base64UrlDecode(options.challenge));
+                if (options.allowCredentials) {
+                    options.allowCredentials = options.allowCredentials.map(function(data) {
+                        return {
+                            ...data,
+                            'id': EncodingHelper.toByteArray(EncodingHelper.base64UrlDecode(data.id)),
+                        };
+                    });
+                }
+
+                return options;
+            }
+        }
+
+        class WebauthnLoginHandler {
+
+            selectors = {
+                usernameInput: '#sw-field--username',
+                submitContainer: '.sw-login__submit'
+            }
+
+            urls = {
+                challenge: '/_action/reply-webauthn/login-options',
+                token: '/api/oauth/token'
+            }
+
+            init() {
+                const submitContainer = document.querySelector(this.selectors.submitContainer);
+                if (submitContainer) {
+                    var div = document.createElement('div');
+                    var button = document.createElement('button');
+                    button.innerText = 'Ohne Passwort einloggen';
+                    button.classList.add('sw-button');
+                    div.appendChild(button);
+
+                    button.addEventListener('click', this._doLogin.bind(this));
+                    submitContainer.appendChild(div);
+                }
+            }
+
+            _doLogin(event) {
+                event.preventDefault();
+                const self = this;
+                this._sendCustomApiRouteRequest(this.urls.challenge, {
+                    username: document.querySelector(this.selectors.usernameInput).value
+                }).then(function(response) {
+                    navigator.credentials.get({publicKey: ConverterHelper.convertOptions(response.data)})
+                        .then(self._sendTokenRequest.bind(self), error => {
+                            console.log(error.toString()); // Example: timeout, interaction refused...
+                    });
+                });
+            }
+
+            _sendTokenRequest(authenticatorData) {
+                const payload = {
+                    client_id: 'administration',
+                    grant_type: 'webauthn',
+                    scopes: 'write',
+                    username: document.querySelector(this.selectors.usernameInput).value,
+                    credential: ConverterHelper.convertAuthenticatorData(authenticatorData)
+                };
+                console.log('Sending token request to server', payload);
+
+                const self = this;
+                this._sendRequest(this.urls.token, payload).then((response) => {
+                    response.json().then(data => {
+                        self._setBearerAuthentication({
+                            access: data.access_token,
+                            refresh: data.refresh_token,
+                            expiry: (new Date).getTime() + data.expires_in
+                        });
+                        window.location.href = '/admin';
+                    });
+                });
+            }
+
+            _setBearerAuthentication({ access, refresh, expiry }) {
+                const authObject = { access, refresh, expiry };
+                this._setCookie('bearerAuth', encodeURIComponent(JSON.stringify(authObject)));
+            }
+
+            /**
+             *
+             * @param {string} key
+             * @param {string} value
+             * @private
+             */
+            _setCookie(key, value) {
+                document.cookie = `${key}=${value};expires=-1;path=/admin`;
+            }
+
+            _sendRequest(url, data) {
+                return window.fetch(url, {
+                    headers : {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    method: 'POST',
+                    body: JSON.stringify(data)
+                });
+            }
+
+            _sendCustomApiRouteRequest(url, data) {
+                const apiClient = Shopware.Application.getContainer('init').httpClient;
+                return apiClient.post(
+                    url,
+                    data,
+                    {
+                        headers : {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                    }
+                });
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            let webauthn = new WebauthnLoginHandler();
+            webauthn.init();
+        });
+    </script>
+{% endblock %}

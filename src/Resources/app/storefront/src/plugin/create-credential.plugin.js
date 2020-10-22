@@ -8,9 +8,9 @@ import DomAccess from 'src/helper/dom-access.helper';
 export default class CreateCredentialPlugin extends Plugin {
 
     static options = {
-        initUrl: window.router['frontend.account.webauthn.credential.creation-options'],
-        saveUrl: window.router['frontend.account.webauthn.credential.save'],
-        modalUrl: window.router['frontend.account.webauthn.credential.creation-modal'],
+        challengeUrl: window.router['frontend.account.webauthn.credential.challenge'],
+        registerUrl: window.router['frontend.account.webauthn.credential.register'],
+        modalUrl: window.router['frontend.account.webauthn.credential.creation-modal']
     };
 
     init() {
@@ -40,7 +40,7 @@ export default class CreateCredentialPlugin extends Plugin {
      */
     _getOptions() {
         PageLoadingIndicatorUtil.create();
-        this._sendRequest(this.options.initUrl, {}, this._createCredential.bind(this));
+        this._sendRequest(this.options.challengeUrl, {}, this._createCredential.bind(this));
     }
 
     /**
@@ -109,8 +109,9 @@ export default class CreateCredentialPlugin extends Plugin {
      * @private
      */
     _saveCredential(credential) {
-        console.log('Sending credential to server', credential);
-        this._sendRequest(this.options.saveUrl, credential, () => {
+        const payload = {credential: credential};
+        console.log('Sending credential to server', payload);
+        this._sendRequest(this.options.registerUrl, payload, () => {
             window.location.reload();
         });
     }
@@ -166,8 +167,8 @@ export default class CreateCredentialPlugin extends Plugin {
             rawId: EncodingHelper.arrayToBase64String(new Uint8Array(data.rawId)),
             response: {
                 clientDataJSON: EncodingHelper.arrayToBase64String(new Uint8Array(data.response.clientDataJSON)),
-                attestationObject: EncodingHelper.arrayToBase64String(new Uint8Array(data.response.attestationObject)),
-            },
+                attestationObject: EncodingHelper.arrayToBase64String(new Uint8Array(data.response.attestationObject))
+            }
         };
     }
 }

@@ -1,0 +1,137 @@
+<?xml version="1.0" ?>
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+    <services>
+        <service id="Reply\WebAuthn\Bridge\Oauth\ApiAuthenticationListener">
+            <tag name="kernel.event_subscriber"/>
+            <argument type="service" id="shopware.api.authorization_server"/>
+            <argument type="service" id="Shopware\Core\Framework\Api\OAuth\RefreshTokenRepository"/>
+            <argument type="service" id="Reply\WebAuthn\Bridge\UserVerificationService"/>
+            <argument type="service" id="Reply\WebAuthn\Bridge\UserIdResolver"/>
+        </service>
+        <service id="Reply\WebAuthn\Bridge\UserVerificationService">
+            <argument id="Reply\WebAuthn\Bridge\DbalPublicKeyCredentialSourceRepository" type="service"/>
+            <argument id="Reply\WebAuthn\Bridge\PublicKeyCredentialRequestOptionsFactory" type="service"/>
+            <argument id="Reply\WebAuthn\Bridge\PublicKeyCredentialRequestOptionsRepository" type="service"/>
+            <argument id="Webauthn\PublicKeyCredentialLoader" type="service"/>
+            <argument id="Webauthn\AuthenticatorAssertionResponseValidator" type="service"/>
+            <argument id="Reply\WebAuthn\Bridge\PublicKeyCredentialDescriptorFakeFactory" type="service"/>
+        </service>
+        <service id="Reply\WebAuthn\Bridge\CredentialRegistrationService">
+            <argument type="service" id="Reply\WebAuthn\Bridge\PublicKeyCredentialCreationOptionsFactory"/>
+            <argument type="service" id="Reply\WebAuthn\Bridge\PublicKeyCredentialCreationOptionsRepository"/>
+            <argument type="service" id="Reply\WebAuthn\Bridge\DbalPublicKeyCredentialSourceRepository"/>
+            <argument type="service" id="Webauthn\PublicKeyCredentialLoader"/>
+            <argument type="service" id="Webauthn\AuthenticatorAttestationResponseValidator"/>
+        </service>
+        <service id="Reply\WebAuthn\Bridge\Oauth\ClientRepository"/>
+
+        <service id="Reply\WebAuthn\Bridge\PublicKeyCredentialDescriptorFakeFactory">
+            <argument>%env(APP_SECRET)%</argument>
+        </service>
+
+        <service id="Reply\WebAuthn\Bridge\AttestationStatementSupportManagerConfigurator">
+            <argument id="Reply\WebAuthn\Configuration\ConfigurationReader" type="service"/>
+            <argument type="tagged" tag="reply.webauthn.supported_attestation_statement"/>
+        </service>
+        <service id="Webauthn\AttestationStatement\AttestationStatementSupportManager">
+            <configurator service="Reply\WebAuthn\Bridge\AttestationStatementSupportManagerConfigurator"/>
+        </service>
+
+        <service id="Webauthn\AttestationStatement\AttestationObjectLoader">
+            <argument id="Webauthn\AttestationStatement\AttestationStatementSupportManager" type="service"/>
+        </service>
+
+        <service id="Webauthn\PublicKeyCredentialLoader">
+            <argument id="Webauthn\AttestationStatement\AttestationObjectLoader" type="service"/>
+        </service>
+
+        <service id="Reply\WebAuthn\Bridge\DbalPublicKeyCredentialSourceRepository">
+            <argument id="Doctrine\DBAL\Connection" type="service"/>
+        </service>
+
+        <service id="Webauthn\TokenBinding\TokenBindingNotSupportedHandler"/>
+        <service id="Webauthn\AuthenticationExtensions\ExtensionOutputCheckerHandler"/>
+
+        <service id="Reply\WebAuthn\Bridge\CoseAlgorithmManagerConfigurator">
+            <argument id="Reply\WebAuthn\Configuration\ConfigurationReader" type="service"/>
+            <argument type="tagged" tag="reply.webauthn.algorithm"/>
+        </service>
+        <service id="Cose\Algorithm\Manager">
+            <configurator service="Reply\WebAuthn\Bridge\CoseAlgorithmManagerConfigurator"/>
+        </service>
+
+        <service id="Reply\WebAuthn\Bridge\PublicKeyCredentialCreationOptionsFactory">
+            <argument id="Cose\Algorithm\Manager" type="service"/>
+            <argument id="Reply\WebAuthn\Configuration\ConfigurationReader" type="service"/>
+        </service>
+
+        <service id="Reply\WebAuthn\Bridge\PublicKeyCredentialRequestOptionsFactory">
+            <argument id="Reply\WebAuthn\Configuration\ConfigurationReader" type="service"/>
+        </service>
+
+        <service id="Webauthn\AuthenticatorAttestationResponseValidator">
+            <argument id="Webauthn\AttestationStatement\AttestationStatementSupportManager" type="service"/>
+            <argument id="Reply\WebAuthn\Bridge\DbalPublicKeyCredentialSourceRepository" type="service"/>
+            <argument id="Webauthn\TokenBinding\TokenBindingNotSupportedHandler" type="service"/>
+            <argument id="Webauthn\AuthenticationExtensions\ExtensionOutputCheckerHandler" type="service"/>
+        </service>
+
+        <service id="Webauthn\AuthenticatorAssertionResponseValidator">
+            <argument id="Reply\WebAuthn\Bridge\DbalPublicKeyCredentialSourceRepository" type="service"/>
+            <argument>null</argument>
+            <argument id="Webauthn\TokenBinding\TokenBindingNotSupportedHandler" type="service"/>
+            <argument id="Webauthn\AuthenticationExtensions\ExtensionOutputCheckerHandler" type="service"/>
+            <argument id="Cose\Algorithm\Manager" type="service"/>
+        </service>
+
+        <service id="Webauthn\AttestationStatement\NoneAttestationStatementSupport">
+            <tag name="reply.webauthn.supported_attestation_statement"/>
+        </service>
+        <service id="Webauthn\AttestationStatement\FidoU2FAttestationStatementSupport">
+            <tag name="reply.webauthn.supported_attestation_statement"/>
+        </service>
+        <service id="Webauthn\AttestationStatement\AndroidKeyAttestationStatementSupport">
+            <tag name="reply.webauthn.supported_attestation_statement"/>
+        </service>
+        <service id="Webauthn\AttestationStatement\TPMAttestationStatementSupport">
+            <tag name="reply.webauthn.supported_attestation_statement"/>
+        </service>
+        <service id="Webauthn\AttestationStatement\PackedAttestationStatementSupport">
+            <argument>null</argument>
+            <argument id="Cose\Algorithm\Manager" type="service"/>
+            <argument>null</argument>
+            <tag name="reply.webauthn.supported_attestation_statement"/>
+        </service>
+        <service id="Reply\WebAuthn\Bridge\PublicKeyCredentialCreationOptionsRepository">
+            <argument id="Doctrine\DBAL\Connection" type="service"></argument>
+        </service>
+        <service id="Reply\WebAuthn\Bridge\PublicKeyCredentialRequestOptionsRepository">
+            <argument id="Doctrine\DBAL\Connection" type="service"></argument>
+        </service>
+
+        <service id="Reply\WebAuthn\Bridge\UserIdResolver">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+        </service>
+
+        <service id="Cose\Algorithm\Signature\RSA\RS256">
+            <tag name="reply.webauthn.algorithm"/>
+        </service>
+        <service id="Cose\Algorithm\Signature\RSA\RS384">
+            <tag name="reply.webauthn.algorithm"/>
+        </service>
+        <service id="Cose\Algorithm\Signature\RSA\RS512">
+            <tag name="reply.webauthn.algorithm"/>
+        </service>
+        <service id="Cose\Algorithm\Signature\ECDSA\ES256">
+            <tag name="reply.webauthn.algorithm"/>
+        </service>
+        <service id="Cose\Algorithm\Signature\ECDSA\ES384">
+            <tag name="reply.webauthn.algorithm"/>
+        </service>
+        <service id="Cose\Algorithm\Signature\ECDSA\ES512">
+            <tag name="reply.webauthn.algorithm"/>
+        </service>
+    </services>
+</container>

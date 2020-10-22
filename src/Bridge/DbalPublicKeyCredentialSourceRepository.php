@@ -12,9 +12,9 @@ use Webauthn\PublicKeyCredentialSource as BaseSource;
 use Webauthn\PublicKeyCredentialUserEntity;
 use Webauthn\TrustPath\TrustPathLoader;
 
-class DoctrinePublicKeyCredentialSourceRepository implements PublicKeyCredentialSourceRepository
+class DbalPublicKeyCredentialSourceRepository implements PublicKeyCredentialSourceRepository
 {
-    public const TABLE_NAME = 'customer_credential';
+    public const TABLE_NAME = 'webauthn_credential';
 
     /**
      * @var Connection
@@ -38,8 +38,8 @@ class DoctrinePublicKeyCredentialSourceRepository implements PublicKeyCredential
         $query = $this->connection->createQueryBuilder();
         $query->select('*')
             ->from(self::TABLE_NAME)
-            ->where('id = :id')
-            ->setParameter('id', $publicKeyCredentialId);
+            ->where('external_id = :external_id')
+            ->setParameter('external_id', $publicKeyCredentialId);
 
         /** @var ResultStatement $result */
         $result = $query->execute();
@@ -99,7 +99,7 @@ class DoctrinePublicKeyCredentialSourceRepository implements PublicKeyCredential
     public function deleteById(string $credentialId): void
     {
         $this->connection->delete(self::TABLE_NAME, [
-            'id' => $credentialId
+            'external_id' => $credentialId
         ]);
     }
 
@@ -120,7 +120,7 @@ class DoctrinePublicKeyCredentialSourceRepository implements PublicKeyCredential
     private function hydrate(array $values): PublicKeyCredentialSource
     {
         $entity = new PublicKeyCredentialSource(
-            $values['id'],
+            $values['external_id'],
             $values['type'],
             json_decode($values['transports'], true),
             $values['attestation_type'],
@@ -154,7 +154,8 @@ class DoctrinePublicKeyCredentialSourceRepository implements PublicKeyCredential
     private function insert(PublicKeyCredentialSource $publicKeyCredentialSource): void
     {
         $data = [
-            'id' => $publicKeyCredentialSource->getPublicKeyCredentialId(),
+            'id' => \Shopware\Core\Framework\Uuid\Uuid::randomBytes(),
+            'external_id' => $publicKeyCredentialSource->getPublicKeyCredentialId(),
             'type' => $publicKeyCredentialSource->getType(),
             'transports' => json_encode($publicKeyCredentialSource->getTransports()),
             'attestation_type' => $publicKeyCredentialSource->getAttestationType(),
@@ -182,7 +183,7 @@ class DoctrinePublicKeyCredentialSourceRepository implements PublicKeyCredential
         $this->connection->update(
             self::TABLE_NAME,
             $data,
-            ['id' => $publicKeyCredentialSource->getPublicKeyCredentialId()]
+            ['external_id' => $publicKeyCredentialSource->getPublicKeyCredentialId()]
         );
     }
 }

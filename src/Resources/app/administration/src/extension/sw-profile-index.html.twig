@@ -1,0 +1,9 @@
+{% block sw_profile_index_password_card %}
+    {% parent %}
+    <sw-card class="sw-profile__card"
+             :title="$tc('reply-webauthn.titleWebAuthnCard')"
+             :isLoading="isUserLoading || !languageId">
+
+    <reply-webauthn-register-credential></reply-webauthn-register-credential>
+    </sw-card>
+{% endblock %}
