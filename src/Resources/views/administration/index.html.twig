@@ -52,6 +52,69 @@
             }
         }
 
+        class ApiClient {
+            constructor() {
+                this.httpClient = Shopware.Application.getContainer('init').httpClient;
+            }
+
+            challenge(username) {
+                const headers = this.getHeaders();
+                const payload = {
+                    username: username
+                };
+
+                return this.httpClient
+                    .post('/_action/reply-webauthn/login-options', payload, { headers })
+                    .then(response => {
+                        return response.data;
+                    });
+            }
+
+            verify(username, credential) {
+                const headers = this.getHeaders();
+                const payload = {
+                    client_id: 'administration',
+                    grant_type: 'webauthn',
+                    scopes: 'write',
+                    username: username,
+                    credential: credential
+                };
+
+                return window.fetch('/api/oauth/token', {
+                    headers : headers,
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                }).then(response => {
+                    return response.json();
+                });
+            }
+
+            getHeaders() {
+                return {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                };
+            }
+        }
+
+        class TokenStorage {
+
+            setBearerAuthentication({ access, refresh, expiry }) {
+                const authObject = { access, refresh, expiry };
+                this._setCookie('bearerAuth', encodeURIComponent(JSON.stringify(authObject)));
+            }
+
+            /**
+             *
+             * @param {string} key
+             * @param {string} value
+             * @private
+             */
+            _setCookie(key, value) {
+                document.cookie = `${key}=${value};expires=-1;path=/admin`;
+            }
+        }
+
         class WebauthnLoginHandler {
 
             selectors = {
@@ -59,14 +122,12 @@
                 submitContainer: '.sw-login__submit'
             }
 
-            urls = {
-                challenge: '/_action/reply-webauthn/login-options',
-                token: '/api/oauth/token'
-            }
-
             init() {
                 const submitContainer = document.querySelector(this.selectors.submitContainer);
                 if (submitContainer) {
+                    this.apiClient = new ApiClient();
+                    this.tokenStorage = new TokenStorage();
+
                     var div = document.createElement('div');
                     var button = document.createElement('button');
                     button.innerText = 'Ohne Passwort einloggen';
@@ -81,75 +142,23 @@
             _doLogin(event) {
                 event.preventDefault();
                 const self = this;
-                this._sendCustomApiRouteRequest(this.urls.challenge, {
-                    username: document.querySelector(this.selectors.usernameInput).value
-                }).then(function(response) {
-                    navigator.credentials.get({publicKey: ConverterHelper.convertOptions(response.data)})
-                        .then(self._sendTokenRequest.bind(self), error => {
+                const username = document.querySelector(this.selectors.usernameInput).value;
+
+                this.apiClient.challenge(username).then(function(response) {
+                    navigator.credentials.get({publicKey: ConverterHelper.convertOptions(response)})
+                        .then(authenticatorData => {
+                            const credential = ConverterHelper.convertAuthenticatorData(authenticatorData);
+                            self.apiClient.verify(username, credential).then(response => {
+                                self.tokenStorage.setBearerAuthentication({
+                                    access: response.access_token,
+                                    refresh: response.refresh_token,
+                                    expiry: (new Date).getTime() + response.expires_in
+                                });
+                                window.location.href = '/admin';
+                            });
+                        }, error => {
                             console.log(error.toString()); // Example: timeout, interaction refused...
-                    });
-                });
-            }
-
-            _sendTokenRequest(authenticatorData) {
-                const payload = {
-                    client_id: 'administration',
-                    grant_type: 'webauthn',
-                    scopes: 'write',
-                    username: document.querySelector(this.selectors.usernameInput).value,
-                    credential: ConverterHelper.convertAuthenticatorData(authenticatorData)
-                };
-                console.log('Sending token request to server', payload);
-
-                const self = this;
-                this._sendRequest(this.urls.token, payload).then((response) => {
-                    response.json().then(data => {
-                        self._setBearerAuthentication({
-                            access: data.access_token,
-                            refresh: data.refresh_token,
-                            expiry: (new Date).getTime() + data.expires_in
                         });
-                        window.location.href = '/admin';
-                    });
-                });
-            }
-
-            _setBearerAuthentication({ access, refresh, expiry }) {
-                const authObject = { access, refresh, expiry };
-                this._setCookie('bearerAuth', encodeURIComponent(JSON.stringify(authObject)));
-            }
-
-            /**
-             *
-             * @param {string} key
-             * @param {string} value
-             * @private
-             */
-            _setCookie(key, value) {
-                document.cookie = `${key}=${value};expires=-1;path=/admin`;
-            }
-
-            _sendRequest(url, data) {
-                return window.fetch(url, {
-                    headers : {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    method: 'POST',
-                    body: JSON.stringify(data)
-                });
-            }
-
-            _sendCustomApiRouteRequest(url, data) {
-                const apiClient = Shopware.Application.getContainer('init').httpClient;
-                return apiClient.post(
-                    url,
-                    data,
-                    {
-                        headers : {
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json'
-                    }
                 });
             }
         }
