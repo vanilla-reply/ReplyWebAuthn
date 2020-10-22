@@ -1,6 +1,7 @@
 {
     "reply-webauthn": {
         "titleWebAuthnCard": "Passwortlose Authentifizierung",
-        "buttonRegisterCredential": "Schlüssel hinzufügen"
+        "buttonRegisterCredential": "Schlüssel hinzufügen",
+        "credentialPlaceholder": "Mein blauer USB-Schlüssel"
     }
 }

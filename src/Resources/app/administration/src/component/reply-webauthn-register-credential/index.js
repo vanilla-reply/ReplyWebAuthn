@@ -18,7 +18,7 @@ Shopware.Component.register('reply-webauthn-register-credential', {
                     console.log('Received data from local authenticator.');
 
                     const credential = ConverterHelper.convertAuthenticatorData(authenticatorData);
-                    credential.name = 'foobar';
+                    credential.name = this.credentialName;
 
                     console.log('Sending credential to server.');
                     this.credentialApiService.register(credential).then(() => {
@@ -28,5 +28,9 @@ Shopware.Component.register('reply-webauthn-register-credential', {
             });
         }
     },
+    data() {
+        return {
+            credentialName: null
+        }
+    }
 });
-
