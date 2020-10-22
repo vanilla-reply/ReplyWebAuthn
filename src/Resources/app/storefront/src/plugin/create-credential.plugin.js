@@ -10,7 +10,7 @@ export default class CreateCredentialPlugin extends Plugin {
     static options = {
         initUrl: window.router['frontend.account.webauthn.credential.creation-options'],
         saveUrl: window.router['frontend.account.webauthn.credential.save'],
-        modalUrl: window.router['frontend.account.webauthn.credential.creation-modal'],
+        modalUrl: window.router['frontend.account.webauthn.credential.creation-modal']
     };
 
     init() {
@@ -166,8 +166,8 @@ export default class CreateCredentialPlugin extends Plugin {
             rawId: EncodingHelper.arrayToBase64String(new Uint8Array(data.rawId)),
             response: {
                 clientDataJSON: EncodingHelper.arrayToBase64String(new Uint8Array(data.response.clientDataJSON)),
-                attestationObject: EncodingHelper.arrayToBase64String(new Uint8Array(data.response.attestationObject)),
-            },
+                attestationObject: EncodingHelper.arrayToBase64String(new Uint8Array(data.response.attestationObject))
+            }
         };
     }
 }

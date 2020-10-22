@@ -8,7 +8,7 @@ export default class LoginPlugin extends Plugin {
 
     static options = {
         loginOptionsUrl: window.router['frontend.account.webauthn.login.init'],
-        loginValidateUrl: window.router['frontend.account.webauthn.login.finalize'],
+        loginValidateUrl: window.router['frontend.account.webauthn.login.finalize']
     };
 
     init() {
@@ -78,11 +78,15 @@ export default class LoginPlugin extends Plugin {
     }
 
     _sendLoginRequest(authenticatorData) {
-        const loginRequest = this._convertAuthenticatorData(authenticatorData);
+        const formData = FormSerializeUtil.serializeJson(this._form);
+        const payload = {
+            username: formData.username,
+            credential: this._convertAuthenticatorData(authenticatorData)
+        };
 
-        console.log('Sending login request to server', loginRequest);
+        console.log('Sending login request to server', payload);
 
-        this._sendRequest(this.options.loginValidateUrl, loginRequest, this._onLoginSuccess.bind(this));
+        this._sendRequest(this.options.loginValidateUrl, payload, this._onLoginSuccess.bind(this));
     }
 
     _onLoginSuccess(response) {
@@ -109,7 +113,7 @@ export default class LoginPlugin extends Plugin {
             options.allowCredentials = options.allowCredentials.map(function(data) {
                 return {
                     ...data,
-                    'id': EncodingHelper.toByteArray(EncodingHelper.base64UrlDecode(data.id)),
+                    'id': EncodingHelper.toByteArray(EncodingHelper.base64UrlDecode(data.id))
                 };
             });
         }
@@ -126,8 +130,8 @@ export default class LoginPlugin extends Plugin {
                 authenticatorData: EncodingHelper.arrayToBase64String(new Uint8Array(data.response.authenticatorData)),
                 clientDataJSON: EncodingHelper.arrayToBase64String(new Uint8Array(data.response.clientDataJSON)),
                 signature: EncodingHelper.arrayToBase64String(new Uint8Array(data.response.signature)),
-                userHandle: data.response.userHandle ? EncodingHelper.arrayToBase64String(new Uint8Array(data.response.userHandle)) : null,
-            },
+                userHandle: data.response.userHandle ? EncodingHelper.arrayToBase64String(new Uint8Array(data.response.userHandle)) : null
+            }
         };
     }
 }

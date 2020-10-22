@@ -36,12 +36,8 @@
         </service>
 
         <service id="Reply\WebAuthn\Controller\LoginController" public="true">
+            <argument type="service" id="Reply\WebAuthn\Bridge\UserVerificationService"/>
             <argument id="Shopware\Core\Checkout\Customer\SalesChannel\AccountService" type="service"/>
-            <argument id="Reply\WebAuthn\Bridge\PublicKeyCredentialSourceRepository" type="service"/>
-            <argument id="Reply\WebAuthn\Bridge\PublicKeyCredentialDescriptorFakeFactory" type="service"/>
-            <argument id="Reply\WebAuthn\Bridge\PublicKeyCredentialRequestOptionsFactory" type="service"/>
-            <argument id="Webauthn\PublicKeyCredentialLoader" type="service"/>
-            <argument id="Webauthn\AuthenticatorAssertionResponseValidator" type="service"/>
             <argument id="Symfony\Bridge\PsrHttpMessage\Factory\PsrHttpFactory" type="service"/>
             <argument type="service" id="customer.repository"/>
         </service>
