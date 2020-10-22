@@ -101,7 +101,8 @@ class ReplyWebAuthn extends Plugin
     {
         $connection->executeQuery('
             CREATE TABLE IF NOT EXISTS `webauthn_credential` (
-              `id` varbinary(255) NOT NULL PRIMARY KEY,
+              `id` binary(255) NOT NULL PRIMARY KEY,
+              `external_id` varbinary(255) NOT NULL,
               `user_handle` binary(16),
               `name` varchar(255) NOT NULL,
               `type` varchar(255) NOT NULL,

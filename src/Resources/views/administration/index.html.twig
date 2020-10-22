@@ -60,7 +60,7 @@
             }
 
             urls = {
-                challenge: '/api/v1/_action/reply-webauthn/login-options',
+                challenge: '/_action/reply-webauthn/login-options',
                 token: '/api/oauth/token'
             }
 
@@ -81,14 +81,12 @@
             _doLogin(event) {
                 event.preventDefault();
                 const self = this;
-                this._sendRequest(this.urls.challenge, {
+                this._sendCustomApiRouteRequest(this.urls.challenge, {
                     username: document.querySelector(this.selectors.usernameInput).value
                 }).then(function(response) {
-                    response.json().then(options => {
-                        navigator.credentials.get({publicKey: ConverterHelper.convertOptions(options)})
-                            .then(self._sendTokenRequest.bind(self), error => {
-                                console.log(error.toString()); // Example: timeout, interaction refused...
-                            });
+                    navigator.credentials.get({publicKey: ConverterHelper.convertOptions(response.data)})
+                        .then(self._sendTokenRequest.bind(self), error => {
+                            console.log(error.toString()); // Example: timeout, interaction refused...
                     });
                 });
             }
@@ -139,6 +137,19 @@
                     },
                     method: 'POST',
                     body: JSON.stringify(data)
+                });
+            }
+
+            _sendCustomApiRouteRequest(url, data) {
+                const apiClient = Shopware.Application.getContainer('init').httpClient;
+                return apiClient.post(
+                    url,
+                    data,
+                    {
+                        headers : {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                    }
                 });
             }
         }

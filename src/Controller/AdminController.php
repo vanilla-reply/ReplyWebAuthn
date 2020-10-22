@@ -106,8 +106,6 @@ class AdminController
         return new JsonResponse();
     }
 
-
-
     private function getUserFromContext(Context $context): UserEntity
     {
         if (!$context->getSource() instanceof AdminApiSource) {

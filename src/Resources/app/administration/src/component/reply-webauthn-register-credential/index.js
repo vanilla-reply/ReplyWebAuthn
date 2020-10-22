@@ -1,10 +1,12 @@
 import template from './reply-webauthn-register-credential.html.twig';
 import ConverterHelper from "../../helper/converter.helper";
 
+const { Criteria } = Shopware.Data;
+
 Shopware.Component.register('reply-webauthn-register-credential', {
     template,
 
-    inject: ['credentialApiService'],
+    inject: ['credentialApiService', 'repositoryFactory'],
 
     methods: {
         registerCredential() {
@@ -30,7 +32,15 @@ Shopware.Component.register('reply-webauthn-register-credential', {
     },
     data() {
         return {
-            credentialName: null
+            credentialName: null,
+            usersCredentials: null
         }
+    },
+    async created () {
+        const repository = this.repositoryFactory.create('reply_webauthn_credential');
+        repository.search(new Criteria(), Shopware.Context.api)
+            .then((result) => {
+                console.log(result);
+            })
     }
 });
