@@ -5,8 +5,8 @@
 
     {# Register all routes that will be needed in JavaScript to the window.router object #}
     <script>
-        window.router['frontend.account.webauthn.login.init'] = '{{ path('frontend.account.webauthn.login.init') }}';
-        window.router['frontend.account.webauthn.login.finalize'] = '{{ path('frontend.account.webauthn.login.finalize') }}';
+        window.router['frontend.account.webauthn.login.challenge'] = '{{ path('frontend.account.webauthn.login.challenge') }}';
+        window.router['frontend.account.webauthn.login.verify'] = '{{ path('frontend.account.webauthn.login.verify') }}';
         window.router['frontend.account.webauthn.credential.challenge'] = '{{ path('frontend.account.webauthn.credential.challenge') }}';
         window.router['frontend.account.webauthn.credential.creation-modal'] = '{{ path('frontend.account.webauthn.credential.creation-modal') }}';
         window.router['frontend.account.webauthn.credential.register'] = '{{ path('frontend.account.webauthn.credential.register') }}';

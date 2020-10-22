@@ -7,8 +7,8 @@ import PageLoadingIndicatorUtil from 'src/utility/loading-indicator/page-loading
 export default class LoginPlugin extends Plugin {
 
     static options = {
-        loginOptionsUrl: window.router['frontend.account.webauthn.login.init'],
-        loginValidateUrl: window.router['frontend.account.webauthn.login.finalize']
+        loginChallengeUrl: window.router['frontend.account.webauthn.login.challenge'],
+        loginVerifyUrl: window.router['frontend.account.webauthn.login.verify']
     };
 
     init() {
@@ -62,7 +62,7 @@ export default class LoginPlugin extends Plugin {
         event.preventDefault();
         PageLoadingIndicatorUtil.create();
         console.log('Requesting login options from server');
-        this._sendRequest(this.options.loginOptionsUrl, {username: data.username}, this._getCredential.bind(this));
+        this._sendRequest(this.options.loginChallengeUrl, {username: data.username}, this._getCredential.bind(this));
     }
 
     _getCredential(response) {
@@ -86,7 +86,7 @@ export default class LoginPlugin extends Plugin {
 
         console.log('Sending login request to server', payload);
 
-        this._sendRequest(this.options.loginValidateUrl, payload, this._onLoginSuccess.bind(this));
+        this._sendRequest(this.options.loginVerifyUrl, payload, this._onLoginSuccess.bind(this));
     }
 
     _onLoginSuccess(response) {

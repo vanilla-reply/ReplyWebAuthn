@@ -58,13 +58,13 @@ class LoginController extends StorefrontController
     }
 
     /**
-     * @Route("/account/webauthn/login/init", name="frontend.account.webauthn.login.init", methods={"POST"}, defaults={"csrf_protected"=false, "XmlHttpRequest"=true})
+     * @Route("/account/webauthn/login/challenge", name="frontend.account.webauthn.login.challenge", methods={"POST"}, defaults={"csrf_protected"=false, "XmlHttpRequest"=true})
      *
      * @param Request $request
      * @param SalesChannelContext $context
      * @return Response
      */
-    public function init(Request $request, SalesChannelContext $context): Response
+    public function challenge(Request $request, SalesChannelContext $context): Response
     {
         $username = $request->request->get('username');
         if (empty($username)) {
@@ -84,13 +84,13 @@ class LoginController extends StorefrontController
     }
 
     /**
-     * @Route("/account/webauthn/login/finalize", name="frontend.account.webauthn.login.finalize", methods={"POST"}, defaults={"csrf_protected"=false, "XmlHttpRequest"=true})
+     * @Route("/account/webauthn/login/verify", name="frontend.account.webauthn.login.verify", methods={"POST"}, defaults={"csrf_protected"=false, "XmlHttpRequest"=true})
      *
      * @param Request $request
      * @param SalesChannelContext $context
      * @return Response
      */
-    public function finalize(Request $request, SalesChannelContext $context): Response
+    public function verify(Request $request, SalesChannelContext $context): Response
     {
         $username = $request->request->get('username');
         if (empty($username)) {
