@@ -71,7 +71,6 @@
             }
 
             verify(username, credential) {
-                const headers = this.getHeaders();
                 const payload = {
                     client_id: 'administration',
                     grant_type: 'webauthn',
@@ -79,14 +78,16 @@
                     username: username,
                     credential: credential
                 };
+                const options = {
+                    headers: this.getHeaders(),
+                    baseURL: Shopware.Context.api.apiPath
+                };
 
-                return window.fetch('/api/oauth/token', {
-                    headers : headers,
-                    method: 'POST',
-                    body: JSON.stringify(payload)
-                }).then(response => {
-                    return response.json();
-                });
+                return this.httpClient
+                    .post('/oauth/token', payload, options)
+                    .then((response) => {
+                        return response.data;
+                    });
             }
 
             getHeaders() {
