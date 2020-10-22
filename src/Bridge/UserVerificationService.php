@@ -91,7 +91,9 @@ class UserVerificationService
 
         $options = $this->requestOptionsFactory->create($request->getUri()->getHost(), $descriptors);
 
-        $this->requestOptionsRepository->save($userHandle, $options);
+        if ($userHandle !== null) {
+            $this->requestOptionsRepository->save($userHandle, $options);
+        }
 
         return $options;
     }
@@ -115,10 +117,13 @@ class UserVerificationService
             throw new AuthFailedException('Authenticator response did not contain assertion.');
         }
 
-        $requestOptions = $this->requestOptionsRepository->fetch($userHandle);
+        $requestOptions = null;
+        if ($userHandle !== null) {
+            $requestOptions = $this->requestOptionsRepository->fetch($userHandle);
+        }
 
-        if ($requestOptions == null) {
-            throw new AuthFailedException('Could not find request options');
+        if ($requestOptions === null) {
+            throw new AuthFailedException();
         }
 
         try {
@@ -130,7 +135,7 @@ class UserVerificationService
                 $userHandle
             );
         } catch (Exception $e) {
-            throw new AuthFailedException('Failed to validate authenticator assertion.');
+            throw new AuthFailedException();
         }
 
         return $credentialSource->getUserHandle();
