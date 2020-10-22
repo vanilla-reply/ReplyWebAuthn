@@ -90,7 +90,7 @@
         </service>
 
         <service id="Reply\WebAuthn\Bridge\PublicKeyCredentialSourceRepository"
-                 class="Reply\WebAuthn\Bridge\DoctrinePublicKeyCredentialSourceRepository">
+                 class="Reply\WebAuthn\Bridge\DbalPublicKeyCredentialSourceRepository">
             <argument id="Doctrine\DBAL\Connection" type="service"/>
         </service>
 

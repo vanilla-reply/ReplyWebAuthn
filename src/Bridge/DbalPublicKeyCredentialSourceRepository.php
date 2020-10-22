@@ -12,7 +12,7 @@ use Webauthn\PublicKeyCredentialSource as BaseSource;
 use Webauthn\PublicKeyCredentialUserEntity;
 use Webauthn\TrustPath\TrustPathLoader;
 
-class DoctrinePublicKeyCredentialSourceRepository implements PublicKeyCredentialSourceRepository
+class DbalPublicKeyCredentialSourceRepository implements PublicKeyCredentialSourceRepository
 {
     public const TABLE_NAME = 'webauthn_credential';
 
