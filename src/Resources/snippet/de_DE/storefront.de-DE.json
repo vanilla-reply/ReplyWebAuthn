@@ -23,6 +23,6 @@
         "login": {
             "useWebAuthn": "Sicherheitsschlüssel verwenden"
         },
-        "none-secure-warning": "WebAuthn funktioniert nur über https, bitte benutzen sie https!"
+        "none-secure-warning": "Anmelden ohne Passwort nicht möglich: Bitte rufen die Webseite über HTTPS auf."
     }
 }

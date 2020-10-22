@@ -26,19 +26,26 @@
             margin-bottom: 1rem;
         }
     </style>
-    <div class="custom-control custom-checkbox login-use-webauthn">
-        <input type="checkbox"
-               class="custom-control-input js-use-webauthn"
-               name="useWebAuthn"
-               id="useWebAuthn"
-               data-form-field-toggle="true"
-               data-form-field-toggle-target=".js-form-field-toggle-login-password"
-               data-form-field-toggle-value="false"
-        />
-        <label class="custom-control-label no-validation" for="useWebAuthn">
-            {{ 'reply-web-authn.login.useWebAuthn'|trans }}
-        </label>
-    </div>
+    {% if not app.request.secure %}
+        {% sw_include '@Storefront/storefront/utilities/alert.html.twig' with {
+            type: 'warning',
+            content: 'reply-web-authn.none-secure-warning'|trans|sw_sanitize
+        } %}
+    {% else %}
+        <div class="custom-control custom-checkbox login-use-webauthn">
+            <input type="checkbox"
+                   class="custom-control-input js-use-webauthn"
+                   name="useWebAuthn"
+                   id="useWebAuthn"
+                   data-form-field-toggle="true"
+                   data-form-field-toggle-target=".js-form-field-toggle-login-password"
+                   data-form-field-toggle-value="false"
+            />
+            <label class="custom-control-label no-validation" for="useWebAuthn">
+                {{ 'reply-web-authn.login.useWebAuthn'|trans }}
+            </label>
+        </div>
+    {% endif %}
 {% endblock %}
 
 {% block component_account_login_form_redirect %}
