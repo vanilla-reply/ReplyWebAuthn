@@ -27,14 +27,11 @@
             <argument type="service" id="Reply\WebAuthn\Bridge\UserIdResolver"/>
         </service>
         <service id="Reply\WebAuthn\Controller\AccountCredentialController" public="true">
+            <argument type="service" id="Reply\WebAuthn\Bridge\CredentialRegistrationService"/>
             <argument id="Reply\WebAuthn\Page\Account\Credential\AccountCredentialPageLoader" type="service"/>
-            <argument id="Reply\WebAuthn\Bridge\PublicKeyCredentialCreationOptionsFactory" type="service"/>
             <argument id="Reply\WebAuthn\Bridge\PublicKeyCredentialSourceRepository" type="service"/>
-            <argument id="Webauthn\PublicKeyCredentialLoader" type="service"/>
-            <argument id="Webauthn\AuthenticatorAttestationResponseValidator" type="service"/>
             <argument id="Symfony\Bridge\PsrHttpMessage\Factory\PsrHttpFactory" type="service"/>
         </service>
-
         <service id="Reply\WebAuthn\Controller\LoginController" public="true">
             <argument type="service" id="Reply\WebAuthn\Bridge\UserVerificationService"/>
             <argument id="Shopware\Core\Checkout\Customer\SalesChannel\AccountService" type="service"/>
