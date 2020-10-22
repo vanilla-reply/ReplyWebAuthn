@@ -2,6 +2,16 @@
     "reply-webauthn": {
         "titleWebAuthnCard": "Passwordless authentication",
         "buttonRegisterCredential": "Register credential",
-        "credentialPlaceholder": "My blue usb stick"
+        "credentialPlaceholder": "My blue usb stick",
+        "credentials-table": {
+            "title": "Your registered credentials",
+            "name": "Name",
+            "registered-at": "Registered at",
+            "action": "Action",
+            "deleteButton": "Delete"
+        },
+        "credentials-create": {
+            "title": "Register a new credential"
+        }
     }
 }

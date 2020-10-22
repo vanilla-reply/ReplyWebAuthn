@@ -5,6 +5,7 @@ namespace Reply\WebAuthn\Controller;
 use Reply\WebAuthn\Bridge\CredentialRegistrationService;
 use Reply\WebAuthn\Bridge\UserIdResolver;
 use Reply\WebAuthn\Bridge\UserVerificationService;
+use Reply\WebAuthn\DataAbstractionLayer\Entity\WebauthnCredentialEntity;
 use Reply\WebAuthn\Exception\CredentialRegistrationFailedException;
 use Shopware\Core\Framework\Api\Context\AdminApiSource;
 use Shopware\Core\Framework\Api\Context\Exception\InvalidContextSourceException;
@@ -15,6 +16,7 @@ use Shopware\Core\Framework\Routing\Annotation\RouteScope;
 use Shopware\Core\System\User\UserEntity;
 use Symfony\Bridge\PsrHttpMessage\HttpMessageFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Webauthn\PublicKeyCredentialUserEntity;
@@ -47,18 +49,23 @@ class AdminController
     /** @var UserIdResolver */
     private $userIdResolver;
 
+    /** @var EntityRepositoryInterface */
+    private $webauthnCredentialRepository;
+
     public function __construct(
         EntityRepositoryInterface $userRepository,
         UserVerificationService $userVerificationService,
         CredentialRegistrationService $credentialRegistrationService,
         HttpMessageFactoryInterface $httpMessageFactory,
-        UserIdResolver $userIdResolver
+        UserIdResolver $userIdResolver,
+        EntityRepositoryInterface $webauthnCredentialRepository
     ) {
         $this->userRepository = $userRepository;
         $this->userVerificationService = $userVerificationService;
         $this->credentialRegistrationService = $credentialRegistrationService;
         $this->httpMessageFactory = $httpMessageFactory;
         $this->userIdResolver = $userIdResolver;
+        $this->webauthnCredentialRepository = $webauthnCredentialRepository;
     }
 
     /**
@@ -103,7 +110,34 @@ class AdminController
             $this->convertUser($user)
         );
 
-        return new JsonResponse();
+        $searchResult = $this->webauthnCredentialRepository->search(new Criteria(), $context);
+
+        return new JsonResponse($searchResult->getEntities());
+    }
+
+    /**
+     * @Route("/api/v{version}/_action/reply-webauthn/delete-credential", name="api.action.reply_webauthn.delete-credential", methods={"POST"})
+     */
+    public function deleteCredential(Request $request, Context $context): JsonResponse
+    {
+        $id = $request->request->get('id');
+        $searchResult = $this->webauthnCredentialRepository->search(new Criteria([$id]), $context);
+        /** @var WebauthnCredentialEntity $credential */
+        $credential = $searchResult->getEntities()->first();
+        $user = $this->getUserFromContext($context);
+
+        if (!$credential || $credential->getUserHandle() != $user->getId()) {
+            throw new NotFoundHttpException();
+        }
+
+        $this->webauthnCredentialRepository->delete(
+            [['id' => $request->request->get('id')]],
+            $context
+        );
+
+        $searchResult = $this->webauthnCredentialRepository->search(new Criteria(), $context);
+
+        return new JsonResponse($searchResult->getEntities());
     }
 
     private function getUserFromContext(Context $context): UserEntity

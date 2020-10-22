@@ -9,6 +9,7 @@
             <argument type="service" id="Reply\WebAuthn\Bridge\CredentialRegistrationService"/>
             <argument type="service" id="Symfony\Bridge\PsrHttpMessage\Factory\PsrHttpFactory"/>
             <argument type="service" id="Reply\WebAuthn\Bridge\UserIdResolver"/>
+            <argument type="service" id="webauthn_credential.repository"/>
         </service>
         <service id="Reply\WebAuthn\Controller\AccountCredentialController" public="true">
             <argument type="service" id="Reply\WebAuthn\Bridge\CredentialRegistrationService"/>

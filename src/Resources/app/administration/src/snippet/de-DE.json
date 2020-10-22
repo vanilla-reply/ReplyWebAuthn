@@ -2,6 +2,16 @@
     "reply-webauthn": {
         "titleWebAuthnCard": "Passwortlose Authentifizierung",
         "buttonRegisterCredential": "Schlüssel hinzufügen",
-        "credentialPlaceholder": "Mein blauer USB-Schlüssel"
+        "credentialPlaceholder": "Mein blauer USB-Schlüssel",
+        "credentials-table": {
+            "title": "Deine registrierten Schlüssel",
+            "name": "Name",
+            "registered-at": "Registriert am",
+            "action": "Aktion",
+            "deleteButton": "Löschen"
+        },
+        "credentials-create": {
+            "title": "Registriere einen neuen Schlüssel"
+        }
     }
 }

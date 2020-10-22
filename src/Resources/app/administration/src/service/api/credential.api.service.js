@@ -23,6 +23,14 @@ class CredentialApiService {
         });
     }
 
+    delete(id) {
+        const headers = this.getHeaders();
+        const body = {id: id};
+        return this.httpClient.post('/_action/reply-webauthn/delete-credential', body, { headers }).then((response) => {
+            return ApiService.handleResponse(response);
+        });
+    }
+
     getHeaders() {
         return {
             Accept: 'application/json',

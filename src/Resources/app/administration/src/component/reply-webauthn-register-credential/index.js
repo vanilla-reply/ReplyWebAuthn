@@ -23,24 +23,33 @@ Shopware.Component.register('reply-webauthn-register-credential', {
                     credential.name = this.credentialName;
 
                     console.log('Sending credential to server.');
-                    this.credentialApiService.register(credential).then(() => {
+                    this.credentialApiService.register(credential).then((response) => {
                         console.log('Credential successfully registered.');
+                        this.credentials = response;
                     });
                 });
             });
+        },
+        deleteCredential(id) {
+            this.credentialApiService.delete(id).then((response) => {
+                this.credentials = response;
+            });
+        },
+        _pushCredential (credential) {
+            this.credentials.push(credential)
         }
     },
     data() {
         return {
             credentialName: null,
-            usersCredentials: null
+            credentials: []
         }
     },
     async created () {
         const repository = this.repositoryFactory.create('webauthn_credential');
         repository.search(new Criteria(), Shopware.Context.api)
-            .then((result) => {
-                console.log(result);
+            .then((credentialRepository) => {
+                credentialRepository.forEach(this._pushCredential);
             })
     }
 });
