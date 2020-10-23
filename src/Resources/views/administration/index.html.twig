@@ -150,7 +150,12 @@
                                 window.location.href = '/admin';
                             });
                         }, error => {
-                            console.log(error.toString()); // Example: timeout, interaction refused...
+                            console.log(error);
+                            Shopware.State.dispatch('notification/createNotification', {
+                                title: 'Error',
+                                message: error.toString(),
+                                variant: 'error'
+                            });
                         });
                 });
             }
