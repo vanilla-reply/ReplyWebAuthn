@@ -15,7 +15,8 @@
     }
   },
   "require": {
-    "web-auth/webauthn-lib": "^2.1.7"
+    "web-auth/webauthn-lib": "^2.1.7",
+    "web-token/jwt-signature-algorithm-rsa": "^2.2.5"
   },
   "extra": {
     "shopware-plugin-class": "Reply\\WebAuthn\\ReplyWebAuthn",

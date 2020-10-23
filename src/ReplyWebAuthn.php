@@ -155,7 +155,7 @@ class ReplyWebAuthn extends Plugin
             'userVerification' => 'preferred',
             'requireResidentKey' => false,
             'attestationStatementFormats' => [
-                'android-key', 'fido-u2f', 'none', 'tpm', 'packed'
+                'android-key', 'android-safetynet', 'fido-u2f', 'none', 'tpm', 'packed'
             ],
             'algorithms' => [
                 'es256',

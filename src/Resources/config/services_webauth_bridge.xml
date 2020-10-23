@@ -104,6 +104,9 @@
             <argument>null</argument>
             <tag name="reply.webauthn.supported_attestation_statement"/>
         </service>
+        <service id="Webauthn\AttestationStatement\AndroidSafetyNetAttestationStatementSupport">
+            <tag name="reply.webauthn.supported_attestation_statement"/>
+        </service>
         <service id="Reply\WebAuthn\Bridge\PublicKeyCredentialCreationOptionsRepository">
             <argument id="Doctrine\DBAL\Connection" type="service"></argument>
         </service>

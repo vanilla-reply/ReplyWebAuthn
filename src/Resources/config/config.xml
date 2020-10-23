@@ -60,6 +60,10 @@
                     <name>Android Key</name>
                 </option>
                 <option>
+                    <id>android-safetynet</id>
+                    <name>Android Safetynet</name>
+                </option>
+                <option>
                     <id>fido-u2f</id>
                     <name>FIDO U2F</name>
                 </option>
