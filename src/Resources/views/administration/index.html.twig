@@ -109,6 +109,11 @@
                 const submitContainer = document.querySelector(this.selectors.submitContainer);
                 const language = document.querySelector('html').lang;
                 if (submitContainer) {
+                    if (!document.location.href.startsWith('https://')) {
+                        console.log('WebAuthn not available, because website is not using https:// scheme.');
+                        return;
+                    }
+
                     this.apiClient = new ApiClient();
                     this.loginService = Shopware.Application.getContainer('service').loginService;
 
