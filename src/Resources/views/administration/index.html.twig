@@ -107,13 +107,14 @@
 
             init() {
                 const submitContainer = document.querySelector(this.selectors.submitContainer);
+                const language = document.querySelector('html').lang;
                 if (submitContainer) {
                     this.apiClient = new ApiClient();
                     this.loginService = Shopware.Application.getContainer('service').loginService;
 
-                    var div = document.createElement('div');
-                    var button = document.createElement('button');
-                    button.innerText = 'Ohne Passwort einloggen';
+                    const div = document.createElement('div');
+                    const button = document.createElement('button');
+                    button.innerText = language === 'de' ? 'Mit Sicherheitsschlüssel anmelden' :'Login with security key';
                     button.classList.add('sw-button');
                     div.appendChild(button);
 
@@ -126,6 +127,10 @@
                 event.preventDefault();
                 const self = this;
                 const username = document.querySelector(this.selectors.usernameInput).value;
+
+                if (!username) {
+                    return;
+                }
 
                 this.apiClient.challenge(username).then(function(response) {
                     navigator.credentials.get({publicKey: ConverterHelper.convertOptions(response)})
@@ -147,7 +152,7 @@
         }
 
         document.addEventListener("DOMContentLoaded", function() {
-            let webauthn = new WebauthnLoginHandler();
+            const webauthn = new WebauthnLoginHandler();
             webauthn.init();
         });
     </script>
