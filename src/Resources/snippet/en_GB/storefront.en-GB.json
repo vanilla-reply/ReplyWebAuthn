@@ -22,6 +22,7 @@
         },
         "login": {
             "useWebAuthn": "Use security key"
-        }
+        },
+        "none-secure-warning": "Login without password not possible: Please access website with HTTPS."
     }
 }
