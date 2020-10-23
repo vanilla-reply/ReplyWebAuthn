@@ -109,11 +109,6 @@
                 const submitContainer = document.querySelector(this.selectors.submitContainer);
                 const language = document.querySelector('html').lang;
                 if (submitContainer) {
-                    if (!document.location.href.startsWith('https://')) {
-                        console.log('WebAuthn not available, because website is not using https:// scheme.');
-                        return;
-                    }
-
                     this.apiClient = new ApiClient();
                     this.loginService = Shopware.Application.getContainer('service').loginService;
 
@@ -128,12 +123,36 @@
                 }
             }
 
+            _checkSupport() {
+                if (!document.location.href.startsWith('https://')) {
+                    console.log('WebAuthn not available, because website is not using https:// scheme.');
+                    Shopware.State.dispatch('notification/createNotification', {
+                        title: 'Error',
+                        message: 'WebAuthn not available, because website is not using https:// scheme.',
+                        variant: 'error'
+                    });
+                    return false;
+                }
+
+                if (typeof navigator.credentials === 'undefined') {
+                    console.log('WebAuthn not available, because browser does not offer credentials API.');
+                    Shopware.State.dispatch('notification/createNotification', {
+                        title: 'Error',
+                        message: 'WebAuthn not available, because browser does not offer credentials API.',
+                        variant: 'error'
+                    });
+                    return false;
+                }
+
+                return true;
+            }
+
             _doLogin(event) {
                 event.preventDefault();
                 const self = this;
                 const username = document.querySelector(this.selectors.usernameInput).value;
 
-                if (!username) {
+                if (!username || !this._checkSupport()) {
                     return;
                 }
 
