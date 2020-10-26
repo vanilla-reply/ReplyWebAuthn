@@ -108,6 +108,8 @@ class CredentialRegistrationService
         $entity->setName((string)$parsedBody['credential']['name']);
 
         $this->credentialRepository->saveCredentialSource($entity);
+
+        $this->creationOptionsRepository->deleteOne($creationOptions->getUser()->getId());
     }
 
     /**

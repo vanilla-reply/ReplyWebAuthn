@@ -8,6 +8,13 @@
     </imports>
 
     <services>
+        <!-- Console -->
+        <service id="Reply\WebAuthn\Console\CleanupCommand">
+            <argument type="service" id="Reply\WebAuthn\Bridge\PublicKeyCredentialCreationOptionsRepository"/>
+            <argument type="service" id="Reply\WebAuthn\Bridge\PublicKeyCredentialRequestOptionsRepository"/>
+            <tag name="console.command"/>
+        </service>
+
         <!-- Pages -->
         <service id="Reply\WebAuthn\Page\Account\Credential\AccountCredentialPageLoader">
             <argument id="Reply\WebAuthn\Bridge\DbalPublicKeyCredentialSourceRepository" type="service"/>

@@ -2,9 +2,12 @@
 
 namespace Reply\WebAuthn\Bridge;
 
+use DateInterval;
+use DateTime;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Driver\ResultStatement;
 use Doctrine\DBAL\FetchMode;
+use Shopware\Core\Defaults;
 use Webauthn\PublicKeyCredentialRequestOptions;
 
 class PublicKeyCredentialRequestOptionsRepository
@@ -51,5 +54,28 @@ class PublicKeyCredentialRequestOptionsRepository
         }
 
         return PublicKeyCredentialRequestOptions::createFromString($values['payload']);
+    }
+
+    public function cleanup(): void
+    {
+        $lifetime = new DateInterval('PT1H');
+        $minDate = (new DateTime())->sub($lifetime);
+
+        $query = $this->connection->createQueryBuilder();
+        $query->delete(static::TABLE_NAME)
+            ->where('created_at < :min_date')
+            ->setParameter('min_date', $minDate->format(Defaults::STORAGE_DATE_TIME_FORMAT));
+
+        $query->execute();
+    }
+
+    public function deleteOne(string $userHandle): void
+    {
+        $query = $this->connection->createQueryBuilder();
+        $query->delete(static::TABLE_NAME)
+            ->where('user_handle = :user_handle')
+            ->setParameter('user_handle', $userHandle);
+
+        $query->execute();
     }
 }

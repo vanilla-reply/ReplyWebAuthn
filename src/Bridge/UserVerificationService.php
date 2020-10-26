@@ -138,6 +138,8 @@ class UserVerificationService
             throw new AuthFailedException();
         }
 
+        $this->requestOptionsRepository->deleteOne($userHandle);
+
         return $credentialSource->getUserHandle();
     }
 }
